@@ -21,6 +21,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.sites',
     
     # 3rd Party
     'allauth',
@@ -87,3 +88,21 @@ MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# --- django-allauth Settings ---
+SITE_ID = 1
+
+# Force users to have an email and username
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_USERNAME_REQUIRED = True
+# Allow them to log in with either their email OR their username
+ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
+# For now, don't force them to click an email link to log in (we can change this later)
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+
+# Where to send users after they log in or log out
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+
+# During local development, print emails (like password resets) to the terminal instead of sending real emails
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
