@@ -106,3 +106,9 @@ LOGOUT_REDIRECT_URL = '/'
 
 # During local development, print emails (like password resets) to the terminal instead of sending real emails
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+# --- NEW PROXY FIXES ADDED HERE ---
+# 1. Tell allauth we are strictly on HTTP right now, so it stops checking for secure HTTPS referers
+ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
+
+# 2. Disable allauth's aggressive rate-limiting so your IP gets unbanned
+ACCOUNT_RATE_LIMITS = {}
