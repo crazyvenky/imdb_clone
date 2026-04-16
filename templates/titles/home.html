@@ -1,0 +1,106 @@
+{% extends 'base.html' %}
+
+{% block title %}CineVerse - Home{% endblock %}
+
+{% block content %}
+<style>
+    .section-title {
+        font-size: 24px;
+        font-weight: 700;
+        margin-bottom: 20px;
+        border-left: 4px solid var(--imdb-yellow);
+        padding-left: 10px;
+    }
+
+    .movie-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 20px;
+    }
+
+    .movie-card {
+        background-color: var(--imdb-light-gray);
+        border-radius: 8px;
+        overflow: hidden;
+        transition: transform 0.2s ease;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    }
+
+    .movie-card:hover {
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+
+    .movie-poster {
+        width: 100%;
+        height: 300px;
+        object-fit: cover;
+        background-color: #1a1a1a;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #555;
+        font-size: 14px;
+    }
+
+    .movie-info {
+        padding: 15px;
+    }
+
+    .movie-title {
+        font-size: 16px;
+        font-weight: 700;
+        margin: 0 0 5px 0;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .movie-meta {
+        font-size: 12px;
+        color: #aaa;
+        margin-bottom: 8px;
+    }
+
+    .movie-genres {
+        font-size: 11px;
+        color: var(--imdb-yellow);
+        font-weight: 500;
+    }
+</style>
+
+<h2 class="section-title">Latest Releases</h2>
+
+<div class="movie-grid">
+    {% for movie in latest_movies %}
+        <div class="movie-card">
+            <a href="{% url 'apps.titles:movie_detail' movie.id %}" style="text-decoration: none; color: inherit; display: block; height: 100%;">
+                
+                {% if movie.poster %}
+                    <img src="{{ movie.poster.url }}" alt="{{ movie.title }} Poster" class="movie-poster">
+                {% else %}
+                    <div class="movie-poster">No Poster Available</div>
+                {% endif %}
+                
+                <div class="movie-info">
+                    <h3 class="movie-title">{{ movie.title }}</h3>
+                    <div class="movie-meta">
+                        {{ movie.release_date|date:"Y" }} • {{ movie.runtime_minutes|default:"--" }} min
+                    </div>
+                    <div class="movie-genres">
+                        {% for genre in movie.genres.all %}
+                            {{ genre.name }}{% if not forloop.last %} • {% endif %}
+                        {% empty %}
+                            Uncategorized
+                        {% endfor %}
+                    </div>
+                </div>
+                
+            </a>
+        </div>
+    {% empty %}
+        <p style="color: #aaa;">No movies found. Go to the Admin panel and add some!</p>
+    {% endfor %}
+</div>
+
+{% endblock %}

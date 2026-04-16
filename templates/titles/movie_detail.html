@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+
+{% block title %}CineVerse - {{ movie.title }}{% endblock %}
+
+{% block content %}
+<style>
+    .title-area { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; }
+    .rating-blocks { display: flex; gap: 30px; }
+    .rating-item { display: flex; flex-direction: column; align-items: center; }
+    .rating-label { font-size: 12px; color: #aaa; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 4px; }
+    .rating-value-row { display: flex; align-items: center; gap: 8px; font-size: 20px; font-weight: bold; }
+    .star-yellow { color: var(--imdb-yellow); font-size: 28px; }
+    .star-blue { color: #5799ef; font-size: 28px; cursor: pointer; transition: transform 0.2s; }
+    .star-blue:hover { transform: scale(1.1); }
+    .star-empty { color: transparent; -webkit-text-stroke: 2px #5799ef; font-size: 28px; cursor: pointer; transition: transform 0.2s;}
+    .star-empty:hover { transform: scale(1.1); }
+    .sub-text { font-size: 14px; color: #aaa; font-weight: normal; }
+
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 2000; align-items: center; justify-content: center; }
+    .modal-content { background: var(--imdb-light-gray); padding: 30px; border-radius: 8px; width: 400px; max-width: 90%; position: relative; }
+    .close-btn { position: absolute; top: 15px; right: 15px; background: none; border: none; color: #fff; font-size: 20px; cursor: pointer; }
+    .detail-container {
+        display: flex;
+        gap: 40px;
+        margin-top: 20px;
+    }
+    .poster-column {
+        flex: 0 0 300px;
+    }
+    .poster-column img {
+        width: 100%;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.6);
+    }
+    .info-column {
+        flex: 1;
+    }
+    .title-header {
+        font-size: 36px;
+        font-weight: 900;
+        margin: 0 0 10px 0;
+    }
+    .meta-row {
+        color: #aaa;
+        font-size: 14px;
+        margin-bottom: 20px;
+    }
+    .rating-box {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background-color: var(--imdb-light-gray);
+        padding: 8px 16px;
+        border-radius: 4px;
+        margin-bottom: 20px;
+    }
+    .star {
+        color: var(--imdb-yellow);
+        font-size: 24px;
+    }
+    .rating-score {
+        font-size: 20px;
+        font-weight: 700;
+    }
+    .rating-count {
+        color: #888;
+        font-size: 12px;
+    }
+    .section-heading {
+        font-size: 20px;
+        font-weight: 700;
+        margin: 30px 0 15px 0;
+        border-bottom: 1px solid #333;
+        padding-bottom: 8px;
+    }
+    .cast-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+    .cast-member {
+        background: var(--imdb-light-gray);
+        padding: 10px;
+        border-radius: 4px;
+    }
+    .review-card {
+        background: var(--imdb-light-gray);
+        padding: 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+    }
+    .review-author {
+        font-weight: 700;
+        color: var(--imdb-yellow);
+        margin-bottom: 5px;
+    }
+</style>
+
+<div class="detail-container">
+    <div class="poster-column">
+        {% if movie.poster %}
+            <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
+        {% else %}
+            <div style="width:100%; height:450px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; border-radius:8px;">
+                No Poster
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="info-column">
+        
+        <div class="title-area">
+            <div>
+                <h1 class="title-header">{{ movie.title }}</h1>
+                <div class="meta-row">
+                    {{ movie.release_date|date:"Y" }} • {{ movie.runtime_minutes|default:"--" }} min • 
+                    {% for genre in movie.genres.all %}{{ genre.name }}{% if not forloop.last %}, {% endif %}{% endfor %}
+                </div>
+                
+                <div style="margin-top: 15px; display: flex; border-radius: 4px; overflow: hidden; max-width: 250px;">
+                    
+                    <form action="{% url 'apps.lists:toggle_watchlist' movie.id %}" method="POST" style="flex-grow: 1; margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" style="width: 100%; background-color: {% if in_watchlist %}var(--imdb-yellow){% else %}var(--imdb-light-gray){% endif %}; color: {% if in_watchlist %}#000{% else %}#fff{% endif %}; border: none; padding: 10px 15px; cursor: pointer; text-align: left; display: flex; align-items: center; gap: 10px; font-weight: bold; transition: background-color 0.2s;">
+                            <span style="font-size: 20px;">{% if in_watchlist %}✓{% else %}+{% endif %}</span>
+                            <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                                <span>{% if in_watchlist %}In Watchlist{% else %}Watchlist{% endif %}</span>
+                            </div>
+                        </button>
+                    </form>
+
+                    <button onclick="openListModal()" style="background-color: {% if in_watchlist %}var(--imdb-yellow){% else %}var(--imdb-light-gray){% endif %}; color: {% if in_watchlist %}#000{% else %}#fff{% endif %}; border: none; border-left: 1px solid {% if in_watchlist %}#cca312{% else %}#333{% endif %}; padding: 0 15px; cursor: pointer; font-size: 16px; transition: background-color 0.2s;">
+                        ⌄
+                    </button>
+                </div>
+                </div>
+
+            <div class="rating-blocks">
+                <div class="rating-item">
+                    <div class="rating-label">IMDb Rating</div>
+                    <div class="rating-value-row">
+                        <span class="star-yellow">★</span>
+                        <div>{{ movie.avg_rating }}<span class="sub-text">/10</span></div>
+                    </div>
+                </div>
+                <div class="rating-item">
+                    <div class="rating-label">Your Rating</div>
+                    <div class="rating-value-row" onclick="openModal()">
+                        {% if user_rating %}
+                            <span class="star-blue">★</span>
+                            <div style="color: #5799ef; cursor: pointer;">{{ user_rating.value }}<span class="sub-text">/10</span></div>
+                        {% else %}
+                            <span class="star-empty">★</span>
+                            <div style="color: #5799ef; cursor: pointer; font-size: 16px;">Rate</div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <p>{{ movie.description|default:"No description available." }}</p>
+
+        <h3 class="section-heading">Top Cast</h3>
+        <div class="cast-grid">
+            {% for credit in movie.cast_members.all %}
+                <div class="cast-member">
+                    <strong>{{ credit.person.name }}</strong><br>
+                    <span style="color:#aaa; font-size:12px;">
+                        {{ credit.get_role_display }}
+                        {% if credit.character_name %}<br>as {{ credit.character_name }}{% endif %}
+                    </span>
+                </div>
+            {% empty %}
+                <p style="color:#888;">No cast information added yet.</p>
+            {% endfor %}
+        </div>
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; margin: 30px 0 15px 0; padding-bottom: 8px;">
+            <h3 class="section-heading" style="border: none; margin: 0; padding: 0;">User Reviews</h3>
+            <button onclick="openModal()" style="color: #5799ef; background: none; border: none; font-weight: bold; cursor: pointer;">+ Review</button>
+        </div>
+        
+        {% for review in movie.reviews.all %}
+            <div class="review-card">
+                <div class="review-author">{{ review.user.username }}</div>
+                <div style="font-size:12px; color:#888; margin-bottom:8px;">{{ review.created_at|date:"F j, Y" }}</div>
+                <p style="margin:0;">{{ review.text }}</p>
+            </div>
+        {% empty %}
+            <p style="color:#888;">No reviews yet. Be the first to review!</p>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="modal-overlay" id="ratingModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeModal()">✕</button>
+        <h2 style="margin-top: 0; text-align: center; color: var(--imdb-yellow);">Rate this title</h2>
+        <p style="text-align: center; color: #aaa; margin-bottom: 20px;">{{ movie.title }}</p>
+
+        {% if user.is_authenticated %}
+            <form method="POST">
+                {% csrf_token %}
+                <div style="display: flex; justify-content: center; gap: 5px; margin-bottom: 20px; font-size: 32px; cursor: pointer; color: #555;">
+                    <span class="star-select" data-val="1">★</span><span class="star-select" data-val="2">★</span><span class="star-select" data-val="3">★</span><span class="star-select" data-val="4">★</span><span class="star-select" data-val="5">★</span><span class="star-select" data-val="6">★</span><span class="star-select" data-val="7">★</span><span class="star-select" data-val="8">★</span><span class="star-select" data-val="9">★</span><span class="star-select" data-val="10">★</span>
+                </div>
+                
+                <div id="rating-display" style="text-align: center; color: #5799ef; font-size: 24px; font-weight: bold; margin-bottom: 20px; height: 30px;">
+                    {% if user_rating %}{{ user_rating.value }} / 10{% endif %}
+                </div>
+
+                {{ form.rating }} <label style="display: block; font-size: 14px; color: #aaa; margin-bottom: 5px;">Add a written review (Optional)</label>
+                {{ form.text }}
+
+                <button type="submit" style="width: 100%; background-color: var(--imdb-yellow); color: var(--imdb-black); border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                    Submit
+                </button>
+            </form>
+        {% else %}
+            <div style="text-align: center;">
+                <p>You must log in to rate and review.</p>
+                <a href="{% url 'account_login' %}" style="display: inline-block; background-color: var(--imdb-yellow); color: #000; padding: 10px 20px; border-radius: 4px; text-decoration: none; font-weight: bold;">Sign In</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal-overlay" id="listModal">
+    <div class="modal-content" style="width: 450px; padding: 0; background-color: #222;">
+        
+        <div style="padding: 20px; display: flex; gap: 15px; border-bottom: 1px solid #333; position: relative;">
+            <button onclick="closeListModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #fff; font-size: 18px; cursor: pointer;">✕</button>
+            {% if movie.poster %}
+                <img src="{{ movie.poster.url }}" style="width: 50px; height: 75px; border-radius: 4px; object-fit: cover;">
+            {% endif %}
+            <div>
+                <div style="color: #aaa; font-size: 12px; margin-bottom: 4px;">{{ movie.title }}</div>
+                <h2 style="margin: 0; font-size: 20px; color: #fff;">Add to list</h2>
+            </div>
+        </div>
+
+        {% if user.is_authenticated %}
+        <a href="{% url 'apps.lists:watchlist' %}" style="display: flex; justify-content: space-between; padding: 15px 20px; color: #fff; text-decoration: none; border-bottom: 1px solid #333; font-size: 14px;">
+            <span>View Watchlist</span> <span>›</span>
+        </a>
+        <a href="{% url 'apps.lists:create_list' %}" style="display: flex; justify-content: space-between; padding: 15px 20px; color: #fff; text-decoration: none; border-bottom: 1px solid #333; font-size: 14px;">
+            <span>Create new list</span> <span>›</span>
+        </a>
+
+        <div style="max-height: 300px; overflow-y: auto;">
+            {% for custom_list in user_custom_lists %}
+                <div style="display: flex; align-items: stretch; border-bottom: 1px solid #333;">
+                    
+                    <form action="{% url 'apps.lists:toggle_custom_list' movie.id custom_list.id %}" method="POST" style="flex-grow: 1; margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" style="width: 100%; height: 100%; background: none; border: none; color: #fff; padding: 15px 20px; text-align: left; cursor: pointer; display: flex; align-items: center; gap: 15px; font-size: 16px;">
+                            {% if custom_list.id in user_lists_with_movie %}
+                                <span style="font-size: 18px; width: 20px; text-align: center;">✓</span>
+                            {% else %}
+                                <span style="font-size: 24px; width: 20px; text-align: center; font-weight: 300;">+</span>
+                            {% endif %}
+                            <span>{{ custom_list.name }}</span>
+                        </button>
+                    </form>
+                    
+                    <a href="{% url 'apps.lists:custom_list_detail' custom_list.id %}" style="color: #fff; text-decoration: none; padding: 0 20px; border-left: 1px solid #333; font-size: 20px; display: flex; align-items: center; justify-content: center; transition: background-color 0.2s;">
+                        ›
+                    </a>
+                    
+                </div>
+            {% empty %}
+                <div style="text-align: center; color: #aaa; padding: 20px 0; font-size: 14px;">No lists found</div>
+            {% endfor %}
+        </div>
+        
+        {% else %}
+        <div style="padding: 30px; text-align: center;">
+            <p style="color: #aaa;">Sign in to add this to a list.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    // Modal Logic
+    const ratingModal = document.getElementById('ratingModal');
+    const listModal = document.getElementById('listModal'); // NEW
+    
+    function openModal() { ratingModal.style.display = 'flex'; }
+    function closeModal() { ratingModal.style.display = 'none'; }
+    
+    function openListModal() { listModal.style.display = 'flex'; } // NEW
+    function closeListModal() { listModal.style.display = 'none'; } // NEW
+    
+    // Close modals if clicking outside the box
+    window.onclick = function(event) {
+        if (event.target == ratingModal) { ratingModal.style.display = "none"; }
+        if (event.target == listModal) { listModal.style.display = "none"; } // NEW
+    }
+
+    // Star Selection Logic
+    document.addEventListener("DOMContentLoaded", function() {
+        const stars = document.querySelectorAll('.star-select');
+        const hiddenInput = document.getElementById('hidden-rating-input');
+        const ratingDisplay = document.getElementById('rating-display');
+        
+        // Initialize stars if user already rated
+        if (hiddenInput && hiddenInput.value) { updateStarColors(hiddenInput.value); }
+
+        stars.forEach(star => {
+            star.addEventListener('mouseover', function() { updateStarColors(this.getAttribute('data-val')); });
+            star.addEventListener('mouseout', function() { updateStarColors(hiddenInput.value || 0); });
+            star.addEventListener('click', function() {
+                let val = this.getAttribute('data-val');
+                hiddenInput.value = val;
+                updateStarColors(val);
+                ratingDisplay.innerText = val + " / 10";
+            });
+        });
+
+        function updateStarColors(value) {
+            stars.forEach(s => {
+                s.style.color = parseInt(s.getAttribute('data-val')) <= parseInt(value) ? '#5799ef' : '#555';
+            });
+        }
+    });
+</script>
+{% endblock %}

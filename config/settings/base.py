@@ -22,13 +22,21 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.sites',
+    'django.contrib.postgres',
     
     # 3rd Party
     'allauth',
     'allauth.account',
     
     # Local Apps
+    'apps.core',
     'apps.accounts',
+    'apps.titles',
+    'apps.people',
+    'apps.interactions',
+    'apps.social',
+    'apps.lists',
+    'apps.search',
 ]
 
 MIDDLEWARE = [

@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit List - {{ custom_list.name }}{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <h1 style="font-size: 32px; margin-bottom: 30px;">Edit your list</h1>
+
+    <form method="POST" style="background: var(--imdb-light-gray); padding: 30px; border-radius: 8px;">
+        {% csrf_token %}
+        
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 12px; color: #aaa; margin-bottom: 5px;">List Name</label>
+            <input type="text" name="name" value="{{ custom_list.name }}" required
+                   style="width: 100%; padding: 15px; border-radius: 4px; border: 1px solid #555; background: transparent; color: #fff; font-size: 16px; box-sizing: border-box;">
+        </div>
+
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 12px; color: #aaa; margin-bottom: 5px;">Description</label>
+            <textarea name="description" rows="4"
+                      style="width: 100%; padding: 15px; border-radius: 4px; border: 1px solid #555; background: transparent; color: #fff; font-size: 16px; box-sizing: border-box; resize: vertical;">{{ custom_list.description }}</textarea>
+        </div>
+
+        <div style="margin-bottom: 30px;">
+            <h4 style="margin: 0 0 10px 0;">Privacy setting</h4>
+            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; cursor: pointer;">
+                <input type="radio" name="is_public" value="True" {% if custom_list.is_public %}checked{% endif %} style="accent-color: var(--imdb-yellow);">
+                <span>Public <span style="color: #aaa; font-size: 12px;">(Anyone can view your list)</span></span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                <input type="radio" name="is_public" value="False" {% if not custom_list.is_public %}checked{% endif %} style="accent-color: var(--imdb-yellow);">
+                <span>Private <span style="color: #aaa; font-size: 12px;">(Only you can view your list)</span></span>
+            </label>
+        </div>
+
+        <button type="submit" style="background-color: var(--imdb-yellow); color: #000; border: none; padding: 10px 30px; font-weight: bold; font-size: 16px; border-radius: 20px; cursor: pointer;">
+            Save Changes
+        </button>
+    </form>
+
+    <div style="margin-top: 50px; padding: 20px; border: 1px solid #ff4d4d; border-radius: 8px; background: rgba(255, 77, 77, 0.05);">
+        <h3 style="color: #ff4d4d; margin-top: 0;">Danger Zone</h3>
+        <p style="color: #aaa; font-size: 14px; margin-bottom: 15px;">Once you delete a list, there is no going back. Please be certain.</p>
+        
+        <form method="POST" onsubmit="return confirm('Are you sure you want to permanently delete this list? This cannot be undone.');">
+            {% csrf_token %}
+            <button type="submit" name="delete_list" style="background-color: transparent; color: #ff4d4d; border: 1px solid #ff4d4d; padding: 8px 16px; font-weight: bold; border-radius: 4px; cursor: pointer; transition: background 0.2s;">
+                Delete this list
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}
