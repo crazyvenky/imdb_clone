@@ -13,6 +13,9 @@ environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 
 SECRET_KEY = env('SECRET_KEY')
 
+# --- django-allauth Settings ---
+SITE_ID = 1
+
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -98,8 +101,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# --- django-allauth Settings ---
-SITE_ID = 1
 
 # Force users to have an email and username
 ACCOUNT_EMAIL_REQUIRED = True
@@ -113,11 +114,37 @@ ACCOUNT_EMAIL_VERIFICATION = 'none'
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-# During local development, print emails (like password resets) to the terminal instead of sending real emails
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 # --- NEW PROXY FIXES ADDED HERE ---
 # 1. Tell allauth we are strictly on HTTP right now, so it stops checking for secure HTTPS referers
 ACCOUNT_DEFAULT_HTTP_PROTOCOL = 'http'
 
 # 2. Disable allauth's aggressive rate-limiting so your IP gets unbanned
 ACCOUNT_RATE_LIMITS = {}
+
+# ==========================================
+# EMAIL & ALLAUTH CONFIGURATION (PRODUCTION READY)
+# ==========================================
+
+# 1. Use actual SMTP servers instead of the terminal
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+
+# 2. Your Gmail Credentials
+EMAIL_HOST_USER = 'hey.cineverse@gmail.com' # Put your Gmail here
+EMAIL_HOST_PASSWORD = 'fydllwzmpksysnsf'     # Put your 16-character App Password here (spaces don't matter)
+
+# 3. What the user sees in their inbox
+DEFAULT_FROM_EMAIL = 'CineVerse <hey.cineverse@gmail.com>'
+
+# 2. Tell Allauth to care about emails
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_EMAIL_VERIFICATION = "optional"
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[CineVerse] "
+
+# 3. Security configurations
+ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
+ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
+
