@@ -33,6 +33,7 @@ class Title(BaseModel):
     tmdb_id = models.IntegerField(unique=True, null=True, blank=True)
     popularity = models.FloatField(default=0.0)
     poster_path = models.CharField(max_length=255, null=True, blank=True)
+    trailer_key = models.CharField(max_length=100, null=True, blank=True)
 
     # Denormalized Aggregates (Updated via Interactions Service later)
     avg_rating = models.DecimalField(max_digits=4, decimal_places=2, default=0.00)

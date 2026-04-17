@@ -83,7 +83,19 @@ def movie_detail_view(request, pk):
                 messages.success(request, "Your review has been saved!")
 
         return redirect('apps.titles:movie_detail', pk=movie.id)
+
+    # NEW: BUNDLE RATINGS INTO REVIEWS
     # ==========================================
+    # Fetch all reviews for this movie
+    movie_reviews = list(Review.objects.filter(title=movie).select_related('user').order_by('-created_at'))
+    
+    # Fetch all ratings for this movie and map them by user_id
+    movie_ratings = Rating.objects.filter(title=movie)
+    user_rating_map = {rating.user_id: rating.value for rating in movie_ratings}
+
+    # Attach the rating value directly to the review object for the template
+    for review in movie_reviews:
+        review.user_star_rating = user_rating_map.get(review.user_id)
 
     context = {
         'movie': movie,
@@ -94,5 +106,6 @@ def movie_detail_view(request, pk):
         'in_watchlist': in_watchlist,
         'user_custom_lists': user_custom_lists,
         'user_lists_with_movie': user_lists_with_movie,
+        'movie_reviews': movie_reviews, # <-- ADD THIS TO CONTEXT
     }
     return render(request, 'titles/movie_detail.html', context)

@@ -52,7 +52,8 @@ def sync_tmdb_to_local(tmdb_results):
 # 2. DETAILS API (Used by Detail View)
 # ==========================================
 def fetch_tmdb_details(tmdb_id):
-    url = f"https://api.themoviedb.org/3/movie/{tmdb_id}?append_to_response=credits"
+    # NEW: We added ",videos" to the append_to_response!
+    url = f"https://api.themoviedb.org/3/movie/{tmdb_id}?append_to_response=credits,videos"
     headers = {
         "accept": "application/json",
         "Authorization": f"Bearer {settings.TMDB_READ_ACCESS_TOKEN}"
@@ -68,7 +69,13 @@ def fetch_tmdb_details(tmdb_id):
 def sync_tmdb_details(title_obj, data):
     if not data:
         return
+        
     title_obj.runtime_minutes = data.get('runtime')
+    videos = data.get('videos', {}).get('results', [])
+    # Search for the first video that is a YouTube Trailer
+    trailer = next((v for v in videos if v['site'] == 'YouTube' and v['type'] == 'Trailer'), None)
+    if trailer:
+        title_obj.trailer_key = trailer['key']
     title_obj.save()
 
     for g in data.get('genres', []):
