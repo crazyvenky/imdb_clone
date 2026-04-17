@@ -29,24 +29,36 @@ class Title(BaseModel):
     runtime_minutes = models.PositiveIntegerField(null=True, blank=True)
     genres = models.ManyToManyField(Genre, related_name='titles')
     poster = models.ImageField(upload_to='posters/', null=True, blank=True)
+    # --- NEW TMDB FIELDS ---
+    tmdb_id = models.IntegerField(unique=True, null=True, blank=True)
+    popularity = models.FloatField(default=0.0)
+    poster_path = models.CharField(max_length=255, null=True, blank=True)
 
     # Denormalized Aggregates (Updated via Interactions Service later)
     avg_rating = models.DecimalField(max_digits=4, decimal_places=2, default=0.00)
     rating_count = models.PositiveIntegerField(default=0)
 
     # PostgreSQL FTS (Uncomment if using Postgres locally)
-    search_vector = SearchVectorField(null=True, editable=False)
+    search_vector = SearchVectorField(null=True, blank=True)
 
     class Meta:
+        # These indexes make searching and sorting lightning fast
         indexes = [
-            GinIndex(fields=['search_vector'], name='title_search_gin'),
-            models.Index(fields=['title', 'release_date']),
+            GinIndex(fields=['search_vector']),
+            models.Index(fields=['-popularity']),
         ]
 
     def __str__(self):
-        return f"{self.title} ({self.get_type_display()})"
+        return self.title
 
-
+    # Dynamic URL Property - Saves EC2 storage by hotlinking TMDB's CDN
+    @property
+    def poster_url(self):
+        if self.poster_path:
+            return f"https://image.tmdb.org/t/p/w500{self.poster_path}"
+        elif self.poster: # Fallback to local uploaded poster if it exists
+            return self.poster.url
+        return None
 class TitleCast(BaseModel):
     """Bridge table connecting a Person to a Title with a specific role."""
     class RoleType(models.TextChoices):

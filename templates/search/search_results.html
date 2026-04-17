@@ -29,8 +29,8 @@
             {% for movie in results %}
                 <div class="result-item">
                     <a href="{% url 'apps.titles:movie_detail' movie.id %}">
-                        {% if movie.poster %}
-                            <img src="{{ movie.poster.url }}" class="result-poster" alt="{{ movie.title }}">
+                        {% if movie.poster_url %}
+                            <img src="{{ movie.poster_url }}" class="result-poster" alt="{{ movie.title }}">
                         {% else %}
                             <div class="result-poster">No Image</div>
                         {% endif %}
@@ -39,13 +39,10 @@
                     <div class="result-info">
                         <a href="{% url 'apps.titles:movie_detail' movie.id %}" class="result-title">{{ movie.title }}</a>
                         <div class="result-meta">
-                            {{ movie.release_date|date:"Y" }} • 
-                            {% if movie.director %}{{ movie.director }}{% else %}Unknown Director{% endif %}
+                            {{ movie.release_date|date:"Y" }} 
                         </div>
-                        
                         <div class="result-actions">
-                            <span style="color: #fff;">⭐ {% if movie.average_rating %}{{ movie.average_rating|floatformat:1 }}{% else %}N/A{% endif %}</span>
-                            <span style="color: #5799ef; cursor: pointer;">☆ Rate</span>
+                            <span style="color: #fff;">⭐ {{ movie.avg_rating|floatformat:1 }}</span>
                         </div>
                     </div>
                 </div>

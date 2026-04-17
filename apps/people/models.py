@@ -7,6 +7,7 @@ class Person(BaseModel):
     name = models.CharField(max_length=255)
     bio = models.TextField(blank=True)
     birth_date = models.DateField(null=True, blank=True)
+    profile_path = models.CharField(max_length=255, null=True, blank=True)
     
     # We will use Pillow for this later
     headshot = models.ImageField(upload_to='people/', null=True, blank=True)

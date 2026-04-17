@@ -138,3 +138,9 @@ ACCOUNT_EMAIL_SUBJECT_PREFIX = "[CineVerse]"
 # 3. Security configurations
 ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
 ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
+
+
+# ==========================================
+# TMDB API CONFIGURATION
+# ==========================================
+TMDB_READ_ACCESS_TOKEN = env('TMDB_READ_ACCESS_TOKEN', default='')

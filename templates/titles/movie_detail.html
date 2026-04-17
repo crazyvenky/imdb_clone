@@ -98,8 +98,8 @@
 
 <div class="detail-container">
     <div class="poster-column">
-        {% if movie.poster %}
-            <img src="{{ movie.poster.url }}" alt="{{ movie.title }}">
+        {% if movie.poster_url %}
+            <img src="{{ movie.poster_url }}" alt="{{ movie.title }}">
         {% else %}
             <div style="width:100%; height:450px; background:#1a1a1a; display:flex; align-items:center; justify-content:center; border-radius:8px;">
                 No Poster
@@ -133,7 +133,7 @@
                         ⌄
                     </button>
                 </div>
-                </div>
+            </div>
 
             <div class="rating-blocks">
                 <div class="rating-item">
@@ -144,8 +144,9 @@
                     </div>
                 </div>
                 <div class="rating-item">
-                    <div class="rating-label">Your Rating</div>
-                    <div class="rating-value-row" onclick="openModal()">
+                <div class="rating-label">Your Rating</div>
+                <div style="display: flex; flex-direction: column; align-items: center;">
+                    <div class="rating-value-row" onclick="openRatingModal()">
                         {% if user_rating %}
                             <span class="star-blue">★</span>
                             <div style="color: #5799ef; cursor: pointer;">{{ user_rating.value }}<span class="sub-text">/10</span></div>
@@ -154,31 +155,64 @@
                             <div style="color: #5799ef; cursor: pointer; font-size: 16px;">Rate</div>
                         {% endif %}
                     </div>
+                    
+                    {% if user_rating %}
+                        <form method="POST" style="margin-top: 2px;">
+                            {% csrf_token %}
+                            <button type="submit" name="action" value="delete_rating" style="background: none; border: none; color: #5799ef; font-size: 11px; cursor: pointer; font-weight: bold; padding: 0;">Remove</button>
+                        </form>
+                    {% endif %}
                 </div>
+            </div>
             </div>
         </div>
 
         <p>{{ movie.description|default:"No description available." }}</p>
 
+        <p style="margin-top: 15px; font-size: 16px;">
+            <strong style="color: #fff;">Director:</strong> 
+            <span style="color: #5799ef;">
+                {% for d in directors %}
+                    {{ d.person.name }}{% if not forloop.last %}, {% endif %}
+                {% empty %}
+                    Unknown
+                {% endfor %}
+            </span>
+        </p>
+
         <h3 class="section-heading">Top Cast</h3>
-        <div class="cast-grid">
-            {% for credit in movie.cast_members.all %}
-                <div class="cast-member">
-                    <strong>{{ credit.person.name }}</strong><br>
-                    <span style="color:#aaa; font-size:12px;">
-                        {{ credit.get_role_display }}
-                        {% if credit.character_name %}<br>as {{ credit.character_name }}{% endif %}
-                    </span>
+        <div class="cast-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+            {% for actor in actors %}
+                <div class="cast-member" style="display: flex; align-items: center; gap: 15px; background: var(--imdb-light-gray); padding: 10px; border-radius: 8px;">
+                    
+                    {% if actor.person.profile_url %}
+                        <img src="{{ actor.person.profile_url }}" alt="{{ actor.person.name }}" style="width: 50px; height: 50px; border-radius: 50%; object-fit: cover;">
+                    {% else %}
+                        <div style="width: 50px; height: 50px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; font-size: 20px; color: #aaa;">👤</div>
+                    {% endif %}
+
+                    <div style="display: flex; flex-direction: column; justify-content: center;">
+                        <strong style="color: #fff; font-size: 15px;">{{ actor.person.name }}</strong>
+                        <span style="color: #aaa; font-size: 13px;">
+                            {% if actor.character_name %}{{ actor.character_name }}{% endif %}
+                        </span>
+                    </div>
+
                 </div>
             {% empty %}
                 <p style="color:#888;">No cast information added yet.</p>
             {% endfor %}
         </div>
+
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; margin: 30px 0 15px 0; padding-bottom: 8px;">
             <h3 class="section-heading" style="border: none; margin: 0; padding: 0;">User Reviews</h3>
-            <button onclick="openModal()" style="color: #5799ef; background: none; border: none; font-weight: bold; cursor: pointer;">+ Review</button>
+            {% if user_review %}
+                <button onclick="openReviewModal()" style="color: #5799ef; background: none; border: none; font-weight: bold; cursor: pointer;">Edit Review</button>
+            {% else %}
+                <button onclick="openReviewModal()" style="color: #5799ef; background: none; border: none; font-weight: bold; cursor: pointer;">+ Review</button>
+            {% endif %}
         </div>
-        
+            
         {% for review in movie.reviews.all %}
             <div class="review-card">
                 <div class="review-author">{{ review.user.username }}</div>
@@ -193,7 +227,7 @@
 
 <div class="modal-overlay" id="ratingModal">
     <div class="modal-content">
-        <button class="close-btn" onclick="closeModal()">✕</button>
+        <button class="close-btn" onclick="closeRatingModal()">✕</button>
         <h2 style="margin-top: 0; text-align: center; color: var(--imdb-yellow);">Rate this title</h2>
         <p style="text-align: center; color: #aaa; margin-bottom: 20px;">{{ movie.title }}</p>
 
@@ -208,16 +242,55 @@
                     {% if user_rating %}{{ user_rating.value }} / 10{% endif %}
                 </div>
 
-                {{ form.rating }} <label style="display: block; font-size: 14px; color: #aaa; margin-bottom: 5px;">Add a written review (Optional)</label>
-                {{ form.text }}
+                <input type="hidden" name="rating" id="hidden-rating-input" value="{% if user_rating %}{{ user_rating.value }}{% endif %}">
 
-                <button type="submit" style="width: 100%; background-color: var(--imdb-yellow); color: var(--imdb-black); border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer;">
-                    Submit
+                <button type="submit" name="action" value="submit_rating" style="width: 100%; background-color: var(--imdb-yellow); color: var(--imdb-black); border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                    Submit Rating
                 </button>
+
+                {% if user_rating %}
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button type="submit" name="action" value="delete_rating" style="background: none; border: none; color: #5799ef; font-size: 14px; font-weight: bold; cursor: pointer;">
+                            Remove rating
+                        </button>
+                    </div>
+                {% endif %}
             </form>
         {% else %}
             <div style="text-align: center;">
-                <p>You must log in to rate and review.</p>
+                <p>You must log in to rate.</p>
+                <a href="{% url 'account_login' %}" style="display: inline-block; background-color: var(--imdb-yellow); color: #000; padding: 10px 20px; border-radius: 4px; text-decoration: none; font-weight: bold;">Sign In</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal-overlay" id="reviewModal">
+    <div class="modal-content">
+        <button class="close-btn" onclick="closeReviewModal()">✕</button>
+        <h2 style="margin-top: 0; text-align: center; color: var(--imdb-yellow);">Review this title</h2>
+        <p style="text-align: center; color: #aaa; margin-bottom: 20px;">{{ movie.title }}</p>
+
+        {% if user.is_authenticated %}
+            <form method="POST">
+                {% csrf_token %}
+                <textarea name="text" rows="6" style="width: 100%; background: #111; color: #fff; border: 1px solid #333; border-radius: 4px; padding: 10px; margin-bottom: 15px;" placeholder="Write your review here...">{% if user_review %}{{ user_review.text }}{% endif %}</textarea>
+
+                <button type="submit" name="action" value="submit_review" style="width: 100%; background-color: var(--imdb-yellow); color: var(--imdb-black); border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer;">
+                    Submit Review
+                </button>
+
+                {% if user_review %}
+                    <div style="text-align: center; margin-top: 15px;">
+                        <button type="submit" name="action" value="delete_review" style="background: none; border: none; color: #e74c3c; font-size: 14px; font-weight: bold; cursor: pointer;">
+                            Remove review
+                        </button>
+                    </div>
+                {% endif %}
+            </form>
+        {% else %}
+            <div style="text-align: center;">
+                <p>You must log in to review.</p>
                 <a href="{% url 'account_login' %}" style="display: inline-block; background-color: var(--imdb-yellow); color: #000; padding: 10px 20px; border-radius: 4px; text-decoration: none; font-weight: bold;">Sign In</a>
             </div>
         {% endif %}
@@ -229,9 +302,11 @@
         
         <div style="padding: 20px; display: flex; gap: 15px; border-bottom: 1px solid #333; position: relative;">
             <button onclick="closeListModal()" style="position: absolute; top: 15px; right: 15px; background: none; border: none; color: #fff; font-size: 18px; cursor: pointer;">✕</button>
-            {% if movie.poster %}
-                <img src="{{ movie.poster.url }}" style="width: 50px; height: 75px; border-radius: 4px; object-fit: cover;">
+            
+            {% if movie.poster_url %}
+                <img src="{{ movie.poster_url }}" style="width: 50px; height: 75px; border-radius: 4px; object-fit: cover;">
             {% endif %}
+
             <div>
                 <div style="color: #aaa; font-size: 12px; margin-bottom: 4px;">{{ movie.title }}</div>
                 <h2 style="margin: 0; font-size: 20px; color: #fff;">Add to list</h2>
@@ -281,29 +356,30 @@
 </div>
 
 <script>
-    // Modal Logic
     const ratingModal = document.getElementById('ratingModal');
-    const listModal = document.getElementById('listModal'); // NEW
+    const reviewModal = document.getElementById('reviewModal'); 
+    const listModal = document.getElementById('listModal');
     
-    function openModal() { ratingModal.style.display = 'flex'; }
-    function closeModal() { ratingModal.style.display = 'none'; }
+    function openRatingModal() { ratingModal.style.display = 'flex'; }
+    function closeRatingModal() { ratingModal.style.display = 'none'; }
     
-    function openListModal() { listModal.style.display = 'flex'; } // NEW
-    function closeListModal() { listModal.style.display = 'none'; } // NEW
+    function openReviewModal() { reviewModal.style.display = 'flex'; }
+    function closeReviewModal() { reviewModal.style.display = 'none'; }
     
-    // Close modals if clicking outside the box
+    function openListModal() { listModal.style.display = 'flex'; }
+    function closeListModal() { listModal.style.display = 'none'; }
+    
     window.onclick = function(event) {
         if (event.target == ratingModal) { ratingModal.style.display = "none"; }
-        if (event.target == listModal) { listModal.style.display = "none"; } // NEW
+        if (event.target == reviewModal) { reviewModal.style.display = "none"; }
+        if (event.target == listModal) { listModal.style.display = "none"; }
     }
 
-    // Star Selection Logic
     document.addEventListener("DOMContentLoaded", function() {
         const stars = document.querySelectorAll('.star-select');
         const hiddenInput = document.getElementById('hidden-rating-input');
         const ratingDisplay = document.getElementById('rating-display');
         
-        // Initialize stars if user already rated
         if (hiddenInput && hiddenInput.value) { updateStarColors(hiddenInput.value); }
 
         stars.forEach(star => {

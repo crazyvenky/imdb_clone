@@ -16,6 +16,26 @@
     /* Small remove button styling */
     .remove-btn { display: block; text-align: center; background-color: #333; color: #fff; text-decoration: none; padding: 8px; margin-top: 10px; border-radius: 4px; font-size: 12px; font-weight: bold; }
     .remove-btn:hover { background-color: #555; }
+    .list-poster {
+        width: 100%;
+        aspect-ratio: 2 / 3;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+        display: block;
+    }
+    .no-poster-placeholder {
+        width: 100%;
+        aspect-ratio: 2 / 3;
+        background: #1a1a1a;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #555;
+        font-size: 14px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.5);
+    }
 </style>
 
 <h2 class="section-title">Your Watchlist</h2>
@@ -25,10 +45,10 @@
         <div class="movie-card">
             <a href="{% url 'apps.titles:movie_detail' item.title.id %}" style="text-decoration: none; color: inherit; display: block;">
                 
-                {% if item.title.poster %}
-                    <img src="{{ item.title.poster.url }}" alt="{{ item.title.title }} Poster" class="movie-poster">
+                {% if item.title.poster_url %}
+                    <img src="{{ item.title.poster_url }}" alt="{{ item.title.title }}" class="list-poster">
                 {% else %}
-                    <div class="movie-poster">No Poster Available</div>
+                    <div class="no-poster-placeholder">No Image</div>
                 {% endif %}
                 
                 <div class="movie-info">
