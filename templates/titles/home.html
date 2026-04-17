@@ -67,6 +67,29 @@
         color: var(--imdb-yellow);
         font-weight: 500;
     }
+    .home-poster {
+        width: 100%;
+        aspect-ratio: 2 / 3;
+        object-fit: cover;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+        transition: transform 0.2s;
+    }
+    .home-poster:hover {
+        transform: scale(1.03);
+    }
+    .no-poster {
+        width: 100%;
+        aspect-ratio: 2 / 3;
+        background: #1a1a1a;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #555;
+        font-size: 14px;
+        box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    }
 </style>
 
 <h2 class="section-title">Latest Releases</h2>
@@ -74,28 +97,29 @@
 <div class="movie-grid">
     {% for movie in latest_movies %}
         <div class="movie-card">
-            <a href="{% url 'apps.titles:movie_detail' movie.id %}" style="text-decoration: none; color: inherit; display: block; height: 100%;">
-                
-                {% if movie.poster %}
-                    <img src="{{ movie.poster.url }}" alt="{{ movie.title }} Poster" class="movie-poster">
+            <a href="{% url 'apps.titles:movie_detail' movie.id %}" style="text-decoration: none; color: inherit; display: block;">
+    
+                {% if movie.poster_url %}
+                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="home-poster">
                 {% else %}
-                    <div class="movie-poster">No Poster Available</div>
+                    <div class="no-poster">No Poster</div>
                 {% endif %}
-                
-                <div class="movie-info">
-                    <h3 class="movie-title">{{ movie.title }}</h3>
-                    <div class="movie-meta">
-                        {{ movie.release_date|date:"Y" }} • {{ movie.runtime_minutes|default:"--" }} min
+
+                <h3 style="margin: 10px 0 5px 0; font-size: 16px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
+                    {{ movie.title }}
+                </h3>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #aaa;">
+                    <div>
+                        {{ movie.release_date|date:"Y" }} 
+                        {% if movie.runtime_minutes %}
+                            • {{ movie.runtime_minutes }} min
+                        {% endif %}
                     </div>
-                    <div class="movie-genres">
-                        {% for genre in movie.genres.all %}
-                            {{ genre.name }}{% if not forloop.last %} • {% endif %}
-                        {% empty %}
-                            Uncategorized
-                        {% endfor %}
+                    <div style="color: #fff; font-weight: bold;">
+                        <span style="color: var(--imdb-yellow);">★</span> {{ movie.avg_rating|floatformat:1 }}
                     </div>
                 </div>
-                
             </a>
         </div>
     {% empty %}
