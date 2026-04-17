@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Find - CineVerse{% endblock %}
+
+{% block content %}
+<style>
+    .result-item { display: flex; gap: 15px; padding: 15px 0; border-bottom: 1px solid #333; }
+    .result-item:last-child { border-bottom: none; }
+    .result-poster { width: 70px; height: 100px; object-fit: cover; border-radius: 4px; background: #1a1a1a; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #555; text-align: center; }
+    .result-info { flex-grow: 1; display: flex; flex-direction: column; justify-content: center; }
+    .result-title { font-size: 16px; font-weight: bold; color: #fff; text-decoration: none; margin-bottom: 4px; }
+    .result-title:hover { text-decoration: underline; }
+    .result-meta { font-size: 13px; color: #aaa; margin-bottom: 6px; }
+    .result-actions { display: flex; align-items: center; gap: 15px; font-size: 13px; color: #aaa; }
+</style>
+
+<div style="max-width: 900px; margin: 0 auto;">
+    
+    <h1 style="font-size: 32px; font-weight: 400; margin-bottom: 30px; color: #fff;">
+        Search "{{ query }}"
+    </h1>
+
+    <div style="background: var(--imdb-light-gray); border-radius: 8px; padding: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 10px;">
+            <h2 style="font-size: 20px; color: #fff; margin: 0; border-left: 4px solid var(--imdb-yellow); padding-left: 8px;">Titles</h2>
+        </div>
+
+        {% if results %}
+            {% for movie in results %}
+                <div class="result-item">
+                    <a href="{% url 'apps.titles:movie_detail' movie.id %}">
+                        {% if movie.poster %}
+                            <img src="{{ movie.poster.url }}" class="result-poster" alt="{{ movie.title }}">
+                        {% else %}
+                            <div class="result-poster">No Image</div>
+                        {% endif %}
+                    </a>
+                    
+                    <div class="result-info">
+                        <a href="{% url 'apps.titles:movie_detail' movie.id %}" class="result-title">{{ movie.title }}</a>
+                        <div class="result-meta">
+                            {{ movie.release_date|date:"Y" }} • 
+                            {% if movie.director %}{{ movie.director }}{% else %}Unknown Director{% endif %}
+                        </div>
+                        
+                        <div class="result-actions">
+                            <span style="color: #fff;">⭐ {% if movie.average_rating %}{{ movie.average_rating|floatformat:1 }}{% else %}N/A{% endif %}</span>
+                            <span style="color: #5799ef; cursor: pointer;">☆ Rate</span>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p style="color: #aaa; padding: 20px 0;">No exact matches found for "{{ query }}". Try checking your spelling.</p>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}

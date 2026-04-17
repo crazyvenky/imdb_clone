@@ -8,6 +8,7 @@ urlpatterns = [
     path('accounts/', include('allauth.urls')),
     path('', include('apps.titles.urls')),
     path('lists/', include('apps.lists.urls')),
+    path('search/', include('apps.search.urls'))
 ]
 
 # THIS IS THE MAGIC SAUCE FOR LOCAL IMAGES

@@ -64,7 +64,7 @@ TEMPLATES = [
         'OPTIONS': {
             'context_processors': [
                 'django.template.context_processors.debug',
-                'django.template.context_processors.request', # Required by allauth
+                'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
             ],
@@ -101,15 +101,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# Force users to have an email and username
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = True
-# Allow them to log in with either their email OR their username
-ACCOUNT_AUTHENTICATION_METHOD = 'username_email'
-# For now, don't force them to click an email link to log in (we can change this later)
-ACCOUNT_EMAIL_VERIFICATION = 'none'
-
 # Where to send users after they log in or log out
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
@@ -142,9 +133,8 @@ DEFAULT_FROM_EMAIL = 'CineVerse <hey.cineverse@gmail.com>'
 ACCOUNT_EMAIL_REQUIRED = True
 ACCOUNT_AUTHENTICATION_METHOD = "username_email"
 ACCOUNT_EMAIL_VERIFICATION = "optional"
-ACCOUNT_EMAIL_SUBJECT_PREFIX = "[CineVerse] "
+ACCOUNT_EMAIL_SUBJECT_PREFIX = "[CineVerse]"
 
 # 3. Security configurations
 ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
 ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
-

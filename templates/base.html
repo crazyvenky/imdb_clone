@@ -110,9 +110,20 @@
     <nav class="navbar">
         <a href="/" class="navbar-brand">CineVerse</a>
         
-        <form class="search-bar" action="/search/" method="GET">
-            <input type="text" class="search-input" name="q" placeholder="Search CineVerse...">
-            <button type="submit" class="search-btn">🔍</button>
+        <form action="{% url 'apps.search:results' %}" method="GET" style="display: flex; flex-grow: 1; max-width: 800px; margin: 0 20px; background: #fff; border-radius: 4px; overflow: hidden;">
+            
+            <select name="s" style="background: #fff; border: none; padding: 8px 12px; border-right: 1px solid #ccc; color: #333; font-weight: bold; cursor: pointer; outline: none; font-size: 14px;">
+                <option value="all" {% if request.GET.s == 'all' %}selected{% endif %}>All</option>
+                <option value="titles" {% if request.GET.s == 'titles' %}selected{% endif %}>Titles</option>
+                <option value="directors" {% if request.GET.s == 'directors' %}selected{% endif %}>Directors</option>
+                <option value="year" {% if request.GET.s == 'year' %}selected{% endif %}>Year</option>
+            </select>
+            
+            <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search CineVerse" style="flex-grow: 1; padding: 8px 12px; border: none; color: #000; outline: none; font-size: 14px; width: 100%;">
+            
+            <button type="submit" style="background-color: var(--imdb-yellow); border: none; padding: 8px 20px; cursor: pointer;">
+                <span style="color: #000; font-size: 16px; font-weight: bold;">🔍</span>
+            </button>
         </form>
 
         <div class="nav-links">
