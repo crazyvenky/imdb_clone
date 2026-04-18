@@ -10,10 +10,9 @@ class Rating(BaseModel):
 
     class Meta:
         constraints = [
-            # A user can only rate a specific title once
-            models.UniqueConstraint(fields=['user', 'title'], name='unique_user_title_rating'),
             
-            # CHANGED: 'check=' is now 'condition=' for Django 6.0+
+            models.UniqueConstraint(fields=['user', 'title'], name='unique_user_title_rating'),
+     
             models.CheckConstraint(condition=models.Q(value__gte=1) & models.Q(value__lte=10), name='valid_rating_range')
         ]
     
