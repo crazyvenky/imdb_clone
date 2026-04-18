@@ -7,15 +7,12 @@ class ProxyIPMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        # Grab the IP headers Nginx explicitly passed to us
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
         x_real_ip = request.META.get('HTTP_X_REAL_IP')
 
         if x_forwarded_for:
-            # If multiple IPs exist, the first one is the actual user
             request.META['REMOTE_ADDR'] = x_forwarded_for.split(',')[0].strip()
         elif x_real_ip:
             request.META['REMOTE_ADDR'] = x_real_ip
 
         return self.get_response(request)
-        
