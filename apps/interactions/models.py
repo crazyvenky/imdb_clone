@@ -15,7 +15,6 @@ class Rating(BaseModel):
      
             models.CheckConstraint(condition=models.Q(value__gte=1) & models.Q(value__lte=10), name='valid_rating_range')
         ]
-    
         
     def __str__(self):
         return f"{self.user.username} rated {self.title.title} {self.value}/10"

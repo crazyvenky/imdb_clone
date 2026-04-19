@@ -21,7 +21,7 @@ class Command(BaseCommand):
 
         # 2. Setup the email content
         subject = "Huge Updates to CineVerse! 🚀"
-        from_email = "noreply@cineverse.com" # Change this to your actual sender email
+        from_email = "hey.cineverse@gmail.com" # Change this to your actual sender email
 
         # 3. Open a SINGLE connection to the email server (Massive performance boost)
         connection = get_connection()

@@ -9,7 +9,6 @@ class Watchlist(BaseModel):
 
     class Meta:
         constraints = [
-            # Prevent adding the exact same movie to a user's watchlist multiple times
             models.UniqueConstraint(fields=['user', 'title'], name='unique_watchlist_entry')
         ]
 
@@ -20,7 +19,7 @@ class CustomList(BaseModel):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='custom_lists')
     name = models.CharField(max_length=255)
     description = models.TextField(blank=True)
-    is_public = models.BooleanField(default=False) # IMDb lets you share lists!
+    is_public = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user.username}'s List: {self.name}"

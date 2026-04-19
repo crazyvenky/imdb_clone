@@ -1,6 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from .models import Title
+from django.core.paginator import Paginator
+from .models import Title, Genre
 from apps.interactions.models import Review, Rating
 from apps.interactions.services import InteractionService
 from apps.lists.models import CustomList, CustomListItem, Watchlist
@@ -109,3 +110,60 @@ def movie_detail_view(request, pk):
         'movie_reviews': movie_reviews, # <-- ADD THIS TO CONTEXT
     }
     return render(request, 'titles/movie_detail.html', context)
+
+
+def browse_view(request):
+    # 1. Start with all active movies
+    qs = Title.objects.filter(type=Title.TitleType.MOVIE, is_deleted=False)
+    
+    # 2. Grab all filter parameters from the URL
+    genre_id = request.GET.get('genre')
+    year_min = request.GET.get('year_min')
+    year_max = request.GET.get('year_max')
+    rating_min = request.GET.get('rating_min')
+    sort_by = request.GET.get('sort_by', '-popularity') # Default sort
+
+    # 3. Apply Filters Dynamically
+    if genre_id:
+        qs = qs.filter(genres__id=genre_id)
+        
+    if year_min and year_min.isdigit():
+        qs = qs.filter(release_date__year__gte=year_min)
+        
+    if year_max and year_max.isdigit():
+        qs = qs.filter(release_date__year__lte=year_max)
+        
+    if rating_min:
+        try:
+            qs = qs.filter(avg_rating__gte=float(rating_min))
+        except ValueError:
+            pass
+
+    # 4. Apply Sorting
+    valid_sorts = {
+        '-popularity': '-popularity',
+        '-release_date': '-release_date',
+        '-avg_rating': '-avg_rating',
+        'title': 'title'
+    }
+    qs = qs.order_by(valid_sorts.get(sort_by, '-popularity')).distinct()
+
+    # 5. Pagination (24 movies per page for a clean grid)
+    paginator = Paginator(qs, 24)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
+    # 6. Get all genres for the dropdown menu
+    all_genres = Genre.objects.all().order_by('name')
+
+    context = {
+        'page_obj': page_obj,
+        'all_genres': all_genres,
+        # Pass current filters back to the template so the form remembers what you selected!
+        'current_genre': int(genre_id) if genre_id and genre_id.isdigit() else '',
+        'current_year_min': year_min,
+        'current_year_max': year_max,
+        'current_rating_min': rating_min,
+        'current_sort': sort_by,
+    }
+    return render(request, 'titles/browse.html', context)

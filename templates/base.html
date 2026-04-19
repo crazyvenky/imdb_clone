@@ -107,34 +107,50 @@
 </head>
 <body>
 
-    <nav class="navbar">
+   <nav class="navbar">
         <a href="/" class="navbar-brand">CineVerse</a>
         
         <form action="{% url 'apps.search:results' %}" method="GET" style="display: flex; flex-grow: 1; max-width: 800px; margin: 0 20px; background: #fff; border-radius: 4px; overflow: hidden;">
             
-            <select name="s" style="background: #fff; border: none; padding: 8px 12px; border-right: 1px solid #ccc; color: #333; font-weight: bold; cursor: pointer; outline: none; font-size: 14px;">
+            <select name="s" onchange="if(this.value === 'browse') { window.location.href='{% url 'apps.titles:browse' %}'; }" style="background: #fff; border: none; padding: 8px 12px; border-right: 1px solid #ccc; color: #333; font-weight: bold; cursor: pointer; outline: none; font-size: 14px;">
                 <option value="all" {% if request.GET.s == 'all' %}selected{% endif %}>All</option>
                 <option value="titles" {% if request.GET.s == 'titles' %}selected{% endif %}>Titles</option>
                 <option value="directors" {% if request.GET.s == 'directors' %}selected{% endif %}>Directors</option>
                 <option value="year" {% if request.GET.s == 'year' %}selected{% endif %}>Year</option>
+                
+                <option value="" disabled>──────────</option>
+                <option value="browse">Advanced Search ➔</option>
             </select>
             
-            <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search CineVerse" style="flex-grow: 1; padding: 8px 12px; border: none; color: #000; outline: none; font-size: 14px; width: 100%;">
+            <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search CineVerse" style="flex-grow: 1; padding: 8px 12px; border: none; color: #000; outline: none; font-size: 14px; width: 100%;">
             
             <button type="submit" style="background-color: var(--imdb-yellow); border: none; padding: 8px 20px; cursor: pointer;">
                 <span style="color: #000; font-size: 16px; font-weight: bold;">🔍</span>
             </button>
         </form>
 
-        <div class="nav-links">
+        <div class="nav-links" style="display: flex; flex-direction: row; align-items: center; gap: 20px; white-space: nowrap; flex-wrap: nowrap;">
+            
+            <a href="{% url 'apps.titles:browse' %}" style="color: #fff; text-decoration: none; font-weight: bold;">Browse</a>
+            
             {% if user.is_authenticated %}
-                <a href="{% url 'apps.lists:watchlist' %}">Watchlist</a> 
+                <a href="{% url 'apps.lists:watchlist' %}" style="color: #fff; text-decoration: none; font-weight: bold;">Watchlist</a> 
                 
-                <a href="#">{{ user.username }}</a>
-                <a href="{% url 'account_logout' %}">Sign Out</a>
+                <a href="{% url 'apps.social:profile' user.username %}" style="display: flex; align-items: center; gap: 8px; color: #fff; text-decoration: none;">
+                    {% if user.avatar %}
+                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                    {% else %}
+                        <div style="width: 28px; height: 28px; background-color: #5799ef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">👤</div>
+                    {% endif %}
+                    
+                    <span style="font-weight: bold; font-size: 14px;">{{ user.username }}</span>
+                </a>
+
+                <a href="{% url 'account_logout' %}" style="color: #fff; text-decoration: none; font-weight: bold;">Sign Out</a>
             {% else %}
-                <a href="{% url 'account_login' %}">Sign In</a>
+                <a href="{% url 'account_login' %}" style="color: #fff; text-decoration: none; font-weight: bold;">Sign In</a>
             {% endif %}
+            
         </div>
     </nav>
 
