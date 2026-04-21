@@ -10,7 +10,9 @@ urlpatterns = [
     path('create/', views.create_list_view, name='create_list'),
     path('custom/toggle/<uuid:title_id>/<uuid:list_id>/', views.toggle_custom_list, name='toggle_custom_list'),
     path('custom/<uuid:list_id>/', views.custom_list_detail, name='custom_list_detail'),
+    path('custom/<uuid:list_id>/edit/', views.edit_list_view, name='edit_list'),
     
-    # NEW ROUTE FOR EDITING
-    path('custom/<uuid:list_id>/edit/', views.edit_list_view, name='edit_list'), 
+    path('public/', views.public_lists_feed, name='public_lists'),
+    path('<uuid:list_id>/save/', views.save_list_reference, name='save_list_reference'),
+    path('<uuid:list_id>/clone/', views.clone_list, name='clone_list'),
 ]

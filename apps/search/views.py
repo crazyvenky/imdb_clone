@@ -39,7 +39,6 @@ def search_results_view(request):
                 
             return qs
 
-        # Step 1: Initial Local Check
         local_results = get_local_results(query)
         results_list = list(local_results[:20]) 
         if len(results_list) < 3 and search_type in ['all', 'titles']:

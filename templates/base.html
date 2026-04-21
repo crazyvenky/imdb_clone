@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
     <title>{% block title %}CineVerse{% endblock %}</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
@@ -17,14 +17,37 @@
 
         *, *::before, *::after { box-sizing: border-box; }
 
+        /* ==========================================
+           STICKY FOOTER ENGINE (100vh height fix)
+        ========================================== */
+        html, body {
+            height: 100%;
+            margin: 0;
+        }
+
         body {
             background-color: var(--imdb-dark-gray);
             color: var(--text-main);
             font-family: 'Roboto', sans-serif;
-            margin: 0;
             padding: 0;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
         }
-        
+
+        /* Forces content to stretch and push footer down */
+        .main-content-wrapper {
+            flex: 1 0 auto;
+            width: 100%;
+        }
+
+        footer {
+            flex-shrink: 0;
+        }
+
+        /* ==========================================
+           NAVBAR
+        ========================================== */
         .navbar {
             background-color: var(--imdb-light-gray);
             height: 60px;
@@ -342,7 +365,6 @@
         .auth-header h1 { margin: 0 0 10px 0; color: #fff; font-size: 28px; font-weight: 900; }
         .auth-header p { color: #aaa; margin: 0; font-size: 14px; line-height: 1.5; }
 
-        /* Unified input styling inside auth cards */
         .auth-card form p,
         .form-group { margin-bottom: 20px; }
 
@@ -385,7 +407,6 @@
         .form-group textarea:focus { border-color: var(--imdb-yellow); }
         .form-group textarea { resize: vertical; }
 
-        /* Auth button */
         .auth-btn {
             width: 100%;
             background-color: var(--imdb-yellow);
@@ -423,7 +444,6 @@
         }
         .helptext { font-size: 12px; color: #888; display: block; margin-top: 4px; }
 
-        /* Social sign-in button (Google etc.) */
         .social-btn {
             display: flex;
             align-items: center;
@@ -444,7 +464,13 @@
         .social-btn:hover { background-color: #e0e0e0; }
         .social-btn svg { width: 20px; height: 20px; margin-right: 10px; flex-shrink: 0; }
 
-        /* OR divider */
+        /* TOOLTIP UX */
+        .info-tooltip { position: relative; display: inline-flex; align-items: center; justify-content: center; width: 22px; height: 22px; background: #444; color: #fff; border-radius: 50%; font-size: 12px; font-weight: bold; cursor: help; margin-left: 10px; }
+        .info-tooltip .tooltip-text { visibility: hidden; width: 260px; background-color: #1a1a1a; color: #ddd; text-align: left; border-radius: 6px; padding: 12px; position: absolute; z-index: 100; bottom: 130%; left: 50%; margin-left: -130px; opacity: 0; transition: opacity 0.3s; font-weight: normal; border: 1px solid var(--imdb-yellow, #f5c518); box-shadow: 0 4px 15px rgba(0,0,0,0.8); line-height: 1.5; pointer-events: none; }
+        .info-tooltip .tooltip-text::after { content: ""; position: absolute; top: 100%; left: 50%; margin-left: -5px; border-width: 5px; border-style: solid; border-color: var(--imdb-yellow, #f5c518) transparent transparent transparent; }
+        .info-tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+        .tooltip-highlight { color: var(--imdb-yellow, #f5c518); font-weight: bold; }
+
         .divider {
             display: flex;
             align-items: center;
@@ -498,7 +524,6 @@
         }
         .filter-btn:hover { background: #e3b616; }
 
-        /* Generic inline-form styled page (password reset etc.) */
         .styled-form p { margin-bottom: 20px; }
         .styled-form label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
         .styled-form input[type="password"],
@@ -517,23 +542,14 @@
            RESPONSIVE BREAKPOINTS
         ========================================== */
         @media (max-width: 768px) {
-            /* Navbar: hide desktop search + links, show hamburger */
             .navbar { height: auto; padding: 0 16px; flex-wrap: wrap; min-height: 56px; }
             .navbar > .search-bar { display: none; }
             .navbar > .nav-links { display: none; }
             .nav-hamburger { display: flex; margin-left: auto; }
-
-            /* Container */
             .container { margin: 20px auto; padding: 0 14px; }
-
-            /* Movie grid tightens */
             .movie-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
-
-            /* Auth card */
             .auth-card { padding: 28px 20px; }
             .auth-header h1 { font-size: 22px; }
-
-            /* Section title */
             .section-title { font-size: 20px; }
         }
 
@@ -548,7 +564,6 @@
    <nav class="navbar">
         <a href="/" class="navbar-brand">CineVerse</a>
 
-        {# Desktop search bar #}
         <form action="{% url 'apps.search:results' %}" method="GET" class="search-bar">
             <select name="s" onchange="if(this.value==='browse'){window.location.href='{% url 'apps.titles:browse' %}';}">
                 <option value="all" {% if request.GET.s == 'all' %}selected{% endif %}>All</option>
@@ -562,40 +577,43 @@
             <button type="submit"><span style="color:#000;font-size:16px;font-weight:bold;">🔍</span></button>
         </form>
 
-        {# Desktop nav links #}
-        <div class="nav-links">
-            <a href="{% url 'apps.titles:browse' %}">Browse</a>
+        <div class="nav-links" style="display: flex; align-items: center;">
+            <a href="{% url 'apps.titles:browse' %}" style="margin-right: 20px;">Browse</a>
+            <a href="{% url 'apps.lists:public_lists' %}" style="margin-right: 20px;">Public Lists</a>
+            
             {% if user.is_authenticated %}
-                <a href="{% url 'apps.lists:watchlist' %}">Watchlist</a>
-                <a href="{% url 'apps.social:profile' user.username %}" style="display:flex;align-items:center;gap:8px;">
+                <a href="{% url 'apps.lists:watchlist' %}" style="color: var(--imdb-yellow, #f5c518); font-weight: bold; margin-right: 20px;">My Library</a>
+                
+                <a href="{% url 'apps.social:profile' user.username %}" style="display:flex; align-items:center; gap:8px; margin-right: 20px; text-decoration: none;">
                     {% if user.avatar %}
                         <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="nav-avatar">
                     {% else %}
-                        <div class="nav-avatar-placeholder">👤</div>
+                        <div class="nav-avatar-placeholder" style="width: 30px; height: 30px; background: #5799ef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px;">👤</div>
                     {% endif %}
-                    <span>{{ user.username }}</span>
+                    <span style="color: #fff;">{{ user.username }}</span>
                 </a>
-                <a href="{% url 'account_logout' %}">Sign Out</a>
+                <a href="{% url 'account_logout' %}" style="color: #aaa;">Sign Out</a>
             {% else %}
-                <a href="{% url 'account_login' %}">Sign In</a>
+                <a href="{% url 'account_login' %}" style="margin-right: 15px;">Sign In</a>
+                <a href="{% url 'account_signup' %}" style="background: var(--imdb-yellow, #f5c518); color: #000; padding: 6px 14px; border-radius: 4px; font-weight: bold; text-decoration: none;">Sign Up</a>
             {% endif %}
         </div>
 
-        {# Hamburger button (mobile only) #}
         <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu">
             <span></span><span></span><span></span>
         </button>
     </nav>
 
-    {# Mobile slide-down menu #}
+    {# Upgraded Mobile slide-down menu #}
     <div class="mobile-menu" id="mobile-menu">
         <form action="{% url 'apps.search:results' %}" method="GET" class="mobile-search-form">
             <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search CineVerse">
             <button type="submit">🔍</button>
         </form>
         <a href="{% url 'apps.titles:browse' %}">Browse</a>
+        <a href="{% url 'apps.lists:public_lists' %}">Public Lists</a>
         {% if user.is_authenticated %}
-            <a href="{% url 'apps.lists:watchlist' %}">Watchlist</a>
+            <a href="{% url 'apps.lists:watchlist' %}">My Library</a>
             <a href="{% url 'apps.social:profile' user.username %}">{{ user.username }}</a>
             <a href="{% url 'account_logout' %}">Sign Out</a>
         {% else %}
@@ -603,21 +621,22 @@
         {% endif %}
     </div>
 
-    <div class="container">
-        {% if messages %}
-            <ul class="messages">
-                {% for message in messages %}
-                    <li>{{ message }}</li>
-                {% endfor %}
-            </ul>
-        {% endif %}
+    <div class="main-content-wrapper">
+        <div class="container">
+            {% if messages %}
+                <ul class="messages">
+                    {% for message in messages %}
+                        <li>{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
 
-        {% block content %}
-        {% endblock content %}
+            {% block content %}
+            {% endblock content %}
+        </div>
     </div>
 
     <script>
-        // Hamburger toggle
         const hamburger = document.getElementById('nav-hamburger');
         const mobileMenu = document.getElementById('mobile-menu');
         if (hamburger && mobileMenu) {
@@ -626,11 +645,47 @@
             });
         }
 
-        // Back-forward cache reload
         window.addEventListener('pageshow', function(event) {
             if (event.persisted) { window.location.reload(); }
         });
     </script>
+    
+    <footer style="background-color: #000; border-top: 1px solid #222; padding: 60px 20px 30px; margin-top: 80px; font-family: sans-serif;">
+        <div class="container" style="display: flex; flex-wrap: wrap; justify-content: space-between; gap: 40px; margin-bottom: 40px;">
+            
+            <div style="flex: 1; min-width: 250px;">
+                <h2 style="color: var(--imdb-yellow, #f5c518); font-size: 24px; margin: 0 0 15px 0; font-weight: 900; letter-spacing: -1px;">CineVerse</h2>
+                <p style="color: #888; font-size: 14px; line-height: 1.6;">Your ultimate destination to discover, rate, and curate the best in cinema. Join the community and build your perfect movie library.</p>
+            </div>
+
+            <div style="flex: 1; min-width: 150px;">
+                <h3 style="color: #fff; font-size: 16px; margin: 0 0 20px 0;">Explore</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <a href="/" style="color: #aaa; text-decoration: none; font-size: 14px; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">Home</a>
+                    <a href="{% url 'apps.titles:browse' %}" style="color: #aaa; text-decoration: none; font-size: 14px; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">Browse Movies</a>
+                    <a href="{% url 'apps.lists:public_lists' %}" style="color: #aaa; text-decoration: none; font-size: 14px; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">Community Lists</a>
+                </div>
+            </div>
+
+            <div style="flex: 1; min-width: 150px;">
+                <h3 style="color: #fff; font-size: 16px; margin: 0 0 20px 0;">My Account</h3>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    {% if request.user.is_authenticated %}
+                        <a href="{% url 'apps.lists:watchlist' %}" style="color: #aaa; text-decoration: none; font-size: 14px; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">My Library & Watchlist</a>
+                        <a href="{% url 'apps.social:profile' request.user.username %}" style="color: #aaa; text-decoration: none; font-size: 14px; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">My Profile</a>
+                        <a href="{% url 'account_logout' %}" style="color: #aaa; text-decoration: none; font-size: 14px; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">Sign Out</a>
+                    {% else %}
+                        <a href="{% url 'account_login' %}" style="color: #aaa; text-decoration: none; font-size: 14px; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">Sign In</a>
+                        <a href="{% url 'account_signup' %}" style="color: #aaa; text-decoration: none; font-size: 14px; transition: color 0.2s;" onmouseover="this.style.color='#fff'" onmouseout="this.style.color='#aaa'">Create Account</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div style="text-align: center; border-top: 1px solid #222; padding-top: 20px;">
+            <p style="color: #555; font-size: 12px; margin: 0;">&copy; {% now "Y" %} CineVerse. Built with Django. Movie data provided by TMDB.</p>
+        </div>
+    </footer>
 
 </body>
 </html>

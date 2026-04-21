@@ -30,9 +30,21 @@ class CustomListItem(BaseModel):
 
     class Meta:
         constraints = [
-            # Prevent adding the exact same movie to the exact same list twice
             models.UniqueConstraint(fields=['custom_list', 'title'], name='unique_custom_list_item')
         ]
 
     def __str__(self):
         return f"{self.title.title} in {self.custom_list.name}"
+
+
+class SavedList(BaseModel):
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='saved_lists')
+    custom_list = models.ForeignKey('CustomList', on_delete=models.CASCADE, related_name='saved_by')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'custom_list'], name='unique_saved_list')
+        ]
+
+    def __str__(self):
+        return f"{self.user.username} saved {self.custom_list.name}"

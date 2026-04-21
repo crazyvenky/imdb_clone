@@ -1,39 +1,78 @@
 {% extends 'base.html' %}
 
-{% block title %}Your Watchlist - CineVerse{% endblock %}
+{% block title %}My Library - CineVerse{% endblock %}
 
 {% block content %}
+<div class="container">
+    <h1 style="color: #fff; margin-bottom: 30px; font-size: 32px;">My Library</h1>
 
-<h2 class="section-title">Your Watchlist</h2>
-
-<div class="movie-grid">
-    {% for item in watchlist_items %}
-        <div class="movie-card" style="display:block;">
-            <a href="{% url 'apps.titles:movie_detail' item.title.id %}" style="text-decoration:none;color:inherit;">
-                {% if item.title.poster_url %}
-                    <img src="{{ item.title.poster_url }}" alt="{{ item.title.title }}" class="movie-card-poster">
-                {% else %}
-                    <div class="no-poster">No Image</div>
-                {% endif %}
-                <div class="movie-card-info">
-                    <h3 class="movie-card-title">{{ item.title.title }}</h3>
-                    <div class="movie-card-meta">Added {{ item.created_at|date:"M j, Y" }}</div>
+    <div style="margin-bottom: 50px;">
+        <h2 style="color: #fff; border-left: 4px solid var(--imdb-yellow, #f5c518); padding-left: 10px; margin-bottom: 20px;">My Watchlist</h2>
+        <div class="movie-grid">
+            {% for item in watchlist_items %}
+                <div class="movie-card" style="display: block;">
+                    <a href="{% url 'apps.titles:movie_detail' item.title.id %}" style="text-decoration:none; color:inherit;">
+                        {% if item.title.poster_url %}
+                            <img src="{{ item.title.poster_url }}" alt="{{ item.title.title }}" class="movie-card-poster">
+                        {% else %}
+                            <div class="no-poster">No Image</div>
+                        {% endif %}
+                        <div class="movie-card-info">
+                            <h3 class="movie-card-title">{{ item.title.title }}</h3>
+                        </div>
+                    </a>
+                    <div style="padding: 0 12px 12px;">
+                        <form action="{% url 'apps.lists:toggle_watchlist' item.title.id %}" method="POST" style="margin: 0;">
+                            {% csrf_token %}
+                            <button type="submit" class="remove-btn">Remove</button>
+                        </form>
+                    </div>
                 </div>
-            </a>
-            <div style="padding:0 12px 12px;">
-                <form action="{% url 'apps.lists:toggle_watchlist' item.title.id %}" method="POST">
-                    {% csrf_token %}
-                    <button type="submit" class="remove-btn">Remove from List</button>
-                </form>
-            </div>
+            {% empty %}
+                <p style="color: #888; grid-column: 1 / -1; background: #111; padding: 30px; text-align: center; border-radius: 8px;">Your watchlist is empty. Go find some movies!</p>
+            {% endfor %}
         </div>
-    {% empty %}
-        <div style="grid-column:1/-1;text-align:center;padding:50px;background:var(--imdb-light-gray);border-radius:8px;">
-            <div style="font-size:48px;color:#555;margin-bottom:14px;">+</div>
-            <h3 style="margin:0 0 10px 0;">Your Watchlist is empty</h3>
-            <p style="color:#aaa;margin:0;">Save movies to keep track of what you want to watch.</p>
-        </div>
-    {% endfor %}
-</div>
+    </div>
 
+    <div style="margin-bottom: 50px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h2 style="color: #fff; border-left: 4px solid var(--imdb-yellow, #f5c518); padding-left: 10px; margin: 0;">My Custom Lists</h2>
+            <a href="{% url 'apps.lists:create_list' %}" style="background: var(--imdb-yellow, #f5c518); color: #000; padding: 8px 16px; border-radius: 4px; text-decoration: none; font-weight: bold;">+ Create List</a>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            {% for lst in my_lists %}
+                <div style="background: #1a1a1a; border: 1px solid #333; padding: 20px; border-radius: 8px;">
+                    <a href="{% url 'apps.lists:custom_list_detail' lst.id %}" style="color: #fff; text-decoration: none;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 20px;">{{ lst.name }}</h3>
+                    </a>
+                    <div style="color: #888; font-size: 13px; margin-bottom: 10px;">
+                        {% if lst.is_public %}🌍 Public{% else %}🔒 Private{% endif %} • {{ lst.items.count }} Movies
+                    </div>
+                    <p style="color: #aaa; font-size: 14px; margin: 0;">{{ lst.description|truncatechars:60 }}</p>
+                </div>
+            {% empty %}
+                <p style="color: #888;">You haven't created any custom lists yet.</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div style="margin-bottom: 50px;">
+        <h2 style="color: #fff; border-left: 4px solid #5799ef; padding-left: 10px; margin-bottom: 20px;">Lists I've Saved</h2>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+            {% for saved in saved_lists %}
+                <div style="background: #111; border: 1px solid #333; padding: 20px; border-radius: 8px; border-left: 3px solid #5799ef;">
+                    <div style="color: #888; font-size: 12px; margin-bottom: 5px;">Curated by {{ saved.custom_list.user.username }}</div>
+                    <a href="{% url 'apps.lists:custom_list_detail' saved.custom_list.id %}" style="color: #fff; text-decoration: none;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 18px;">{{ saved.custom_list.name }}</h3>
+                    </a>
+                    <div style="color: #888; font-size: 13px;">{{ saved.custom_list.items.count }} Movies</div>
+                </div>
+            {% empty %}
+                <p style="color: #888;">You haven't saved any lists yet. Check out the Public Lists to find some!</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
 {% endblock %}

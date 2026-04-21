@@ -11,10 +11,13 @@ def user_profile_view(request, username):
     profile_user = get_object_or_404(User, username=username)
     section = request.GET.get('section', 'overview')
 
-    # Safe additive queries
     user_reviews = Review.objects.filter(user=profile_user).select_related('title').order_by('-created_at')
     user_ratings = Rating.objects.filter(user=profile_user).select_related('title').order_by('-created_at')
-    user_lists = CustomList.objects.filter(user=profile_user)
+
+    if request.user == profile_user:
+        user_lists = CustomList.objects.filter(user=profile_user)
+    else:
+        user_lists = CustomList.objects.filter(user=profile_user, is_public=True)
 
     context = {
         'profile_user': profile_user,

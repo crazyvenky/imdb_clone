@@ -20,6 +20,32 @@
     {% if custom_list.description %}<br><br>{{ custom_list.description }}{% endif %}
 </div>
 
+{% if request.user != custom_list.user and custom_list.is_public %}
+<div style="display: flex; align-items: center; gap: 12px; margin-bottom: 30px; flex-wrap: wrap; background: #111; padding: 15px; border-radius: 8px; border: 1px solid #333;">
+    
+    <form action="{% url 'apps.lists:save_list_reference' custom_list.id %}" method="POST" style="margin: 0;">
+        {% csrf_token %}
+        <button type="submit" class="auth-btn" style="margin: 0; width: auto; padding: 10px 20px; font-size: 14px;">
+            {% if is_saved %}✅ Remove from Library{% else %}🔖 Save to Library{% endif %}
+        </button>
+    </form>
+
+    <form action="{% url 'apps.lists:clone_list' custom_list.id %}" method="POST" style="margin: 0;">
+        {% csrf_token %}
+        <button type="submit" class="auth-btn" style="margin: 0; width: auto; padding: 10px 20px; font-size: 14px; background-color: #333; color: #fff; border: 1px solid #555;">
+            ⎘ Clone List
+        </button>
+    </form>
+
+    <div class="info-tooltip">i
+        <div class="tooltip-text">
+            <span class="tooltip-highlight">🔖 Save to Library (Refer):</span> Bookmarks this list. If the creator adds new movies, your saved version updates automatically.<br><br>
+            <span class="tooltip-highlight">⎘ Clone List (Fork):</span> Makes a private duplicate just for you. You can add or remove movies, but it won't update if the original creator makes changes.
+        </div>
+    </div>
+</div>
+{% endif %}
+
 <div class="movie-grid">
     {% for item in list_items %}
         <div class="movie-card" style="display:block;">
