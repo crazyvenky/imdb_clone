@@ -62,15 +62,20 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    # custom
     'apps.accounts.middleware.ProxyIPMiddleware',
     'django.middleware.security.SecurityMiddleware',
+    'apps.accounts.middleware.EnforceDomainMiddleware',
+    
+    'allauth.account.middleware.AccountMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'allauth.account.middleware.AccountMiddleware',
+    
+    
 ]
 
 ROOT_URLCONF = 'config.urls'
@@ -132,17 +137,16 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
 EMAIL_HOST_USER = 'hey.cineverse@gmail.com'
-EMAIL_HOST_PASSWORD = 'fydllwzmpksysnsf'
+EMAIL_HOST_PASSWORD = os.environ.get('fydllwzmpksysnsf', '')
 
 DEFAULT_FROM_EMAIL = 'CineVerse <hey.cineverse@gmail.com>'
 
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_AUTHENTICATION_METHOD = "username_email"
+ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
+ACCOUNT_LOGIN_METHODS = {'email', 'username'}
 ACCOUNT_EMAIL_VERIFICATION = "optional"
 ACCOUNT_EMAIL_SUBJECT_PREFIX = "[CineVerse]"
-
-ACCOUNT_LOGIN_ATTEMPTS_LIMIT = 5
-ACCOUNT_LOGIN_ATTEMPTS_TIMEOUT = 300
-
+ACCOUNT_RATE_LIMITS = {
+    'login_failed': '5/5m',
+}
 
 TMDB_READ_ACCESS_TOKEN = env('TMDB_READ_ACCESS_TOKEN', default='')
