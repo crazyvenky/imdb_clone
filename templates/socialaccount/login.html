@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Sign In Via Google - CineVerse{% endblock %}
+
+{% block content %}
+<style>
+    .auth-container { display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 20px; }
+    .auth-card { background: var(--imdb-light-gray, #1a1a1a); padding: 40px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); border: 1px solid #333; text-align: center; }
+    .auth-header { margin-bottom: 30px; }
+    .auth-header h1 { margin: 0 0 10px 0; color: #fff; font-size: 28px; font-weight: 900; }
+    .auth-header p { color: #aaa; margin: 0; font-size: 15px; line-height: 1.5; }
+    
+    .auth-btn { width: 100%; background-color: #4285F4; color: #fff; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 20px; transition: background-color 0.2s; }
+    .auth-btn:hover { background-color: #3367D6; }
+    
+    .cancel-link { display: block; margin-top: 20px; color: #aaa; text-decoration: none; font-size: 14px; font-weight: bold; transition: color 0.2s; }
+    .cancel-link:hover { color: #fff; text-decoration: underline; }
+</style>
+
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Google Sign In</h1>
+            <p>You are about to sign in to CineVerse using your third-party account from Google.</p>
+        </div>
+
+        <form method="post">
+            {% csrf_token %}
+            <button class="auth-btn" type="submit">Continue to Google</button>
+        </form>
+        
+        <a href="{% url 'account_login' %}" class="cancel-link">Cancel</a>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% load i18n %}
+
+{% block title %}Complete Registration - CineVerse{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-header">
+            <h1>Almost Done!</h1>
+            <p>You are signing in with Google.<br>Please confirm your username to complete your CineVerse account.</p>
+        </div>
+
+        <form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
+            {% csrf_token %}
+            
+            {{ form.as_p }}
+            
+            {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+            
+            <button class="auth-btn" type="submit">{% trans "Complete Sign Up" %}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

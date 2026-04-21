@@ -6,7 +6,35 @@
     <title>{% block title %}CineVerse{% endblock %}</title>
     
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-    
+    <style>
+        /* GLOBAL AUTH & FORM STYLES */
+        .auth-container { display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 40px 20px; }
+        .auth-card { background: var(--imdb-light-gray, #1a1a1a); padding: 40px; border-radius: 8px; width: 100%; max-width: 450px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); border: 1px solid #333; }
+        .auth-header { text-align: center; margin-bottom: 30px; }
+        .auth-header h1 { margin: 0 0 10px 0; color: #fff; font-size: 28px; font-weight: 900; }
+        .auth-header p { color: #aaa; margin: 0; font-size: 14px; line-height: 1.5; }
+        
+        .auth-card form p, .form-group { margin-bottom: 20px; }
+        .auth-card label { display: block; color: #ddd; margin-bottom: 8px; font-size: 14px; font-weight: bold; text-transform: capitalize; }
+        
+        /* Unified Input Styling */
+        .auth-card input[type="text"], .auth-card input[type="password"], 
+        .auth-card input[type="email"], .auth-card input[type="url"],
+        .auth-card input[type="date"], .auth-card textarea, .auth-card input[type="file"] { 
+            width: 100%; background: #111; color: #fff; border: 1px solid #333; border-radius: 4px; padding: 12px; font-size: 16px; box-sizing: border-box; outline: none; 
+        }
+        .auth-card input:focus, .auth-card textarea:focus { border-color: var(--imdb-yellow, #f5c518); }
+        
+        .auth-btn { width: 100%; background-color: var(--imdb-yellow, #f5c518); color: #000; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; transition: background-color 0.2s; }
+        .auth-btn:hover { background-color: #e3b616; }
+        
+        .auth-links { text-align: center; margin-top: 20px; font-size: 14px; }
+        .auth-links a, .cancel-link { color: #5799ef; text-decoration: none; font-weight: bold; transition: color 0.2s; }
+        .auth-links a:hover, .cancel-link:hover { text-decoration: underline; color: #fff; }
+        
+        .errorlist { color: #e74c3c; list-style-type: none; padding: 0; font-size: 13px; margin-bottom: 15px; margin-top: 5px; }
+        .helptext { font-size: 12px; color: #888; display: block; margin-top: 4px; }
+    </style>
     <style>
         :root {
             --imdb-yellow: #F5C518;
