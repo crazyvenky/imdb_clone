@@ -3,38 +3,88 @@
 {% block title %}Create a new list - CineVerse{% endblock %}
 
 {% block content %}
-<div style="max-width: 800px; margin: 0 auto;">
-    <h1 style="font-size: 32px; margin-bottom: 5px;">Create a new list</h1>
-    <p style="color: #aaa; margin-top: 0; margin-bottom: 30px;">List your movie, TV & celebrity picks.</p>
+<style>
+    .list-form-card {
+        max-width: 780px;
+        margin: 0 auto;
+    }
+    .list-form-body {
+        background: var(--imdb-light-gray);
+        padding: 30px;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+    .list-input {
+        width: 100%;
+        padding: 14px;
+        border-radius: 4px;
+        border: 1px solid #555;
+        background: transparent;
+        color: #fff;
+        font-size: 16px;
+        outline: none;
+        transition: border-color 0.2s;
+    }
+    .list-input:focus { border-color: var(--imdb-yellow); }
+    .list-input-group { margin-bottom: 20px; }
+    .list-input-group label { display: block; font-size: 12px; color: #aaa; margin-bottom: 6px; font-weight: bold; }
+    .privacy-label {
+        display: flex; align-items: center;
+        gap: 8px; margin-bottom: 10px; cursor: pointer;
+    }
+    .privacy-label input[type="radio"] { accent-color: var(--imdb-yellow); }
+    .privacy-sublabel { color: #aaa; font-size: 12px; }
+    .create-btn {
+        background-color: var(--imdb-yellow);
+        color: #000;
+        border: none;
+        padding: 10px 28px;
+        font-weight: bold;
+        font-size: 16px;
+        border-radius: 20px;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    .create-btn:hover { background-color: #e3b616; }
 
-    <form method="POST" style="background: var(--imdb-light-gray); padding: 30px; border-radius: 8px;">
-        {% csrf_token %}
-        
-        <div style="margin-bottom: 20px;">
-            <input type="text" name="name" placeholder="Enter the name of your list" required
-                   style="width: 100%; padding: 15px; border-radius: 4px; border: 1px solid #555; background: transparent; color: #fff; font-size: 16px; box-sizing: border-box;">
-        </div>
+    @media (max-width: 600px) {
+        .list-form-body { padding: 20px 16px; }
+    }
+</style>
 
-        <div style="margin-bottom: 20px;">
-            <textarea name="description" placeholder="Describe your list..." rows="4"
-                      style="width: 100%; padding: 15px; border-radius: 4px; border: 1px solid #555; background: transparent; color: #fff; font-size: 16px; box-sizing: border-box; resize: vertical;"></textarea>
-        </div>
+<div class="list-form-card">
+    <h1 style="font-size:28px;margin-bottom:4px;">Create a new list</h1>
+    <p style="color:#aaa;margin:0 0 0 2px;font-size:14px;">List your movie, TV &amp; celebrity picks.</p>
 
-        <div style="margin-bottom: 20px;">
-            <h4 style="margin: 0 0 10px 0;">Privacy setting</h4>
-            <label style="display: flex; align-items: center; gap: 8px; margin-bottom: 10px; cursor: pointer;">
-                <input type="radio" name="is_public" value="True" style="accent-color: var(--imdb-yellow);">
-                <span>Public <span style="color: #aaa; font-size: 12px;">(Anyone can view your list)</span></span>
-            </label>
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
-                <input type="radio" name="is_public" value="False" checked style="accent-color: var(--imdb-yellow);">
-                <span>Private <span style="color: #aaa; font-size: 12px;">(Only you can view your list)</span></span>
-            </label>
-        </div>
+    <div class="list-form-body">
+        <form method="POST">
+            {% csrf_token %}
 
-        <button type="submit" style="background-color: var(--imdb-yellow); color: #000; border: none; padding: 10px 30px; font-weight: bold; font-size: 16px; border-radius: 20px; cursor: pointer;">
-            Create
-        </button>
-    </form>
+            <div class="list-input-group">
+                <label>List Name *</label>
+                <input type="text" name="name" class="list-input" placeholder="Enter the name of your list" required>
+            </div>
+
+            <div class="list-input-group">
+                <label>Description</label>
+                <textarea name="description" class="list-input" rows="4" style="resize:vertical;" placeholder="Describe your list..."></textarea>
+            </div>
+
+            <div class="list-input-group">
+                <h4 style="margin:0 0 10px 0;font-size:14px;color:#fff;">Privacy Setting</h4>
+                <label class="privacy-label">
+                    <input type="radio" name="is_public" value="True">
+                    <span>Public <span class="privacy-sublabel">(Anyone can view your list)</span></span>
+                </label>
+                <label class="privacy-label">
+                    <input type="radio" name="is_public" value="False" checked>
+                    <span>Private <span class="privacy-sublabel">(Only you can view your list)</span></span>
+                </label>
+            </div>
+
+            <button type="submit" class="create-btn">Create</button>
+        </form>
+    </div>
 </div>
+
 {% endblock %}

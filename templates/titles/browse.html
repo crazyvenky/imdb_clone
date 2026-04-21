@@ -4,43 +4,89 @@
 
 {% block content %}
 <style>
-    /* Reuse our Premium Movie Cards */
-    .movie-card { background-color: var(--imdb-light-gray, #1a1a1a); border-radius: 8px; overflow: hidden; text-decoration: none; display: block; transition: transform 0.2s ease, box-shadow 0.2s ease; border: 1px solid #222; }
-    .movie-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(0,0,0,0.8); }
-    .movie-card-poster { width: 100%; aspect-ratio: 2 / 3; object-fit: cover; display: block; border-bottom: 1px solid #222; }
-    .no-poster { width: 100%; aspect-ratio: 2 / 3; background: #111; display: flex; align-items: center; justify-content: center; color: #555; font-size: 14px; border-bottom: 1px solid #222; }
-    .movie-card-info { padding: 12px 15px 15px 15px; }
-    .movie-card-title { margin: 0 0 5px 0; font-size: 16px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .movie-card-meta { font-size: 13px; color: #aaa; }
+    .browse-layout {
+        display: flex;
+        gap: 30px;
+        align-items: flex-start;
+    }
+    .sidebar {
+        width: 260px;
+        flex-shrink: 0;
+        background: var(--imdb-light-gray);
+        padding: 25px;
+        border-radius: 8px;
+        border: 1px solid #333;
+        position: sticky;
+        top: 76px; /* below fixed navbar */
+    }
+    .sidebar-heading {
+        color: #fff;
+        margin: 0 0 20px 0;
+        font-size: 20px;
+        border-bottom: 1px solid #333;
+        padding-bottom: 10px;
+    }
+    .year-range { display: flex; gap: 10px; }
+    .year-range input { flex: 1; }
+    .clear-link {
+        display: block;
+        text-align: center;
+        color: #888;
+        text-decoration: none;
+        margin-top: 15px;
+        font-size: 13px;
+    }
+    .clear-link:hover { color: #fff; }
 
-    /* Layout & Forms */
-    .browse-layout { display: flex; gap: 30px; max-width: 1200px; margin: 0 auto; padding: 30px 15px; align-items: flex-start; }
-    .sidebar { width: 280px; flex-shrink: 0; background: var(--imdb-light-gray); padding: 25px; border-radius: 8px; border: 1px solid #333; position: sticky; top: 20px; }
-    .results-area { flex-grow: 1; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 20px; }
-    
-    .filter-group { margin-bottom: 20px; }
-    .filter-group label { display: block; color: #fff; font-weight: bold; margin-bottom: 8px; font-size: 14px; }
-    .filter-group select, .filter-group input { width: 100%; background: #111; color: #fff; border: 1px solid #444; padding: 10px; border-radius: 4px; font-size: 14px; outline: none; }
-    .filter-group select:focus, .filter-group input:focus { border-color: var(--imdb-yellow); }
-    
-    .filter-btn { width: 100%; background: var(--imdb-yellow); color: #000; font-weight: bold; padding: 12px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-top: 10px; }
-    .filter-btn:hover { background: #e3b616; }
-    
-    /* Pagination */
-    .pagination { display: flex; justify-content: center; gap: 10px; margin-top: 40px; }
-    .page-btn { background: #333; color: #fff; padding: 10px 15px; border-radius: 4px; text-decoration: none; font-weight: bold; }
-    .page-btn:hover { background: var(--imdb-yellow); color: #000; }
-    .page-current { background: var(--imdb-yellow); color: #000; padding: 10px 15px; border-radius: 4px; font-weight: bold; }
+    .results-area { flex-grow: 1; min-width: 0; }
+    .results-heading { color: #fff; margin: 0 0 20px 0; font-size: 28px; }
+    .results-count { color: #666; font-size: 18px; }
+
+    /* Filter toggle button (mobile) */
+    .filter-toggle {
+        display: none;
+        width: 100%;
+        background: var(--imdb-light-gray);
+        color: #fff;
+        border: 1px solid #333;
+        padding: 12px;
+        border-radius: 8px;
+        font-weight: bold;
+        font-size: 15px;
+        cursor: pointer;
+        margin-bottom: 16px;
+        text-align: left;
+    }
+
+    @media (max-width: 900px) {
+        .browse-layout { flex-direction: column; }
+        .sidebar {
+            width: 100%;
+            position: static;
+            display: none; /* hidden by default on mobile until toggled */
+        }
+        .sidebar.open { display: block; }
+        .filter-toggle { display: block; }
+        .results-heading { font-size: 22px; }
+    }
+
+    @media (max-width: 480px) {
+        .results-heading { font-size: 18px; }
+        .results-count { font-size: 14px; }
+    }
 </style>
 
+<button class="filter-toggle" id="filter-toggle" onclick="document.getElementById('filter-sidebar').classList.toggle('open'); this.textContent = document.getElementById('filter-sidebar').classList.contains('open') ? '▲ Hide Filters' : '▼ Show Filters';">
+    ▼ Show Filters
+</button>
+
 <div class="browse-layout">
-    
-    <div class="sidebar">
-        <h2 style="color: #fff; margin: 0 0 20px 0; font-size: 20px; border-bottom: 1px solid #333; padding-bottom: 10px;">Advanced Filter</h2>
-        
+
+    <div class="sidebar" id="filter-sidebar">
+        <h2 class="sidebar-heading">Advanced Filter</h2>
+
         <form method="GET" action="{% url 'apps.titles:browse' %}">
-            
+
             <div class="filter-group">
                 <label>Sort By</label>
                 <select name="sort_by">
@@ -63,7 +109,7 @@
 
             <div class="filter-group">
                 <label>Year Range</label>
-                <div style="display: flex; gap: 10px;">
+                <div class="year-range">
                     <input type="number" name="year_min" placeholder="e.g. 1990" value="{{ current_year_min|default_if_none:'' }}">
                     <input type="number" name="year_max" placeholder="e.g. 2024" value="{{ current_year_max|default_if_none:'' }}">
                 </div>
@@ -81,15 +127,17 @@
             </div>
 
             <button type="submit" class="filter-btn">Apply Filters</button>
-            <a href="{% url 'apps.titles:browse' %}" style="display: block; text-align: center; color: #888; text-decoration: none; margin-top: 15px; font-size: 13px;">Clear All</a>
+            <a href="{% url 'apps.titles:browse' %}" class="clear-link">Clear All</a>
         </form>
     </div>
 
     <div class="results-area">
-        <h1 style="color: #fff; margin: 0 0 20px 0; font-size: 28px;">Explore Titles <span style="color: #666; font-size: 18px;">({{ page_obj.paginator.count }} found)</span></h1>
-        
+        <h1 class="results-heading">
+            Explore Titles <span class="results-count">({{ page_obj.paginator.count }} found)</span>
+        </h1>
+
         {% if page_obj %}
-            <div class="grid">
+            <div class="movie-grid">
                 {% for movie in page_obj %}
                     <a href="{% url 'apps.titles:movie_detail' movie.id %}" class="movie-card">
                         {% if movie.poster_url %}
@@ -98,8 +146,8 @@
                             <div class="no-poster">No Poster</div>
                         {% endif %}
                         <div class="movie-card-info">
-                            <div style="color: #fff; font-weight: bold; margin-bottom: 8px; font-size: 14px; display: flex; align-items: center; gap: 5px;">
-                                <span style="color: var(--imdb-yellow); font-size: 16px;">★</span> {{ movie.avg_rating|floatformat:1 }}
+                            <div style="color:#fff;font-weight:bold;margin-bottom:6px;font-size:14px;display:flex;align-items:center;gap:5px;">
+                                <span style="color:var(--imdb-yellow);font-size:16px;">★</span> {{ movie.avg_rating|floatformat:1 }}
                             </div>
                             <h3 class="movie-card-title" title="{{ movie.title }}">{{ movie.title }}</h3>
                             <div class="movie-card-meta">{{ movie.release_date|date:"Y" }}</div>
@@ -113,19 +161,16 @@
                     {% if page_obj.has_previous %}
                         <a href="?{{ request.GET.urlencode }}&page={{ page_obj.previous_page_number }}" class="page-btn">‹ Prev</a>
                     {% endif %}
-                    
                     <span class="page-current">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
-                    
                     {% if page_obj.has_next %}
-                        {% url 'apps.titles:browse' as browse_url %}
                         <a href="?{{ request.GET.urlencode }}&page={{ page_obj.next_page_number }}" class="page-btn">Next ›</a>
                     {% endif %}
                 </div>
             {% endif %}
 
         {% else %}
-            <div style="background: #111; padding: 50px; text-align: center; border-radius: 8px; border: 1px solid #333;">
-                <h3 style="color: #aaa; margin: 0;">No movies match your filters.</h3>
+            <div style="background:#111;padding:50px;text-align:center;border-radius:8px;border:1px solid #333;">
+                <h3 style="color:#aaa;margin:0;">No movies match your filters.</h3>
             </div>
         {% endif %}
     </div>
@@ -133,11 +178,11 @@
 </div>
 
 <script>
+    // Deduplicate page param on pagination links
     document.querySelectorAll('.pagination a').forEach(link => {
         link.addEventListener('click', function(e) {
             let url = new URL(this.href);
             let params = new URLSearchParams(url.search);
-            // If there are multiple 'page' params, clean them up
             let pages = params.getAll('page');
             if (pages.length > 1) {
                 params.delete('page');

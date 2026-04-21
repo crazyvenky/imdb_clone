@@ -4,127 +4,54 @@
 
 {% block content %}
 <style>
-    .section-title {
+    .home-section-title {
         font-size: 24px;
         font-weight: 700;
         margin-bottom: 20px;
         border-left: 4px solid var(--imdb-yellow);
         padding-left: 10px;
     }
-
-    .movie-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-        gap: 20px;
-    }
-
-    .movie-card {
-        background-color: var(--imdb-light-gray);
-        border-radius: 8px;
-        overflow: hidden;
-        transition: transform 0.2s ease;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.5);
-        padding: 5px;
-    }
-
-    .movie-card:hover {
-        transform: scale(1.05);
-        cursor: pointer;
-    }
-
-    .movie-poster {
-        width: 100%;
-        height: 300px;
-        object-fit: cover;
-        background-color: #1a1a1a;
+    .home-movie-meta {
         display: flex;
+        justify-content: space-between;
         align-items: center;
-        justify-content: center;
-        color: #555;
-        font-size: 14px;
-    }
-
-    .movie-info {
-        padding: 15px;
-    }
-
-    .movie-title {
-        font-size: 16px;
-        font-weight: 700;
-        margin: 0 0 5px 0;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-    .movie-meta {
-        font-size: 12px;
+        font-size: 13px;
         color: #aaa;
-        margin-bottom: 8px;
+        margin-top: 6px;
     }
+    .home-movie-rating { color: #fff; font-weight: bold; }
 
-    .movie-genres {
-        font-size: 11px;
-        color: var(--imdb-yellow);
-        font-weight: 500;
-    }
-    .home-poster {
-        width: 100%;
-        aspect-ratio: 2 / 3;
-        object-fit: cover;
-        border-radius: 8px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-        transition: transform 0.2s;
-    }
-    .home-poster:hover {
-        transform: scale(1.03);
-    }
-    .no-poster {
-        width: 100%;
-        aspect-ratio: 2 / 3;
-        background: #1a1a1a;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: #555;
-        font-size: 14px;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+    @media (max-width: 480px) {
+        .home-section-title { font-size: 18px; }
     }
 </style>
 
-<h2 class="section-title">Latest Releases</h2>
+<h2 class="home-section-title">Latest Releases</h2>
 
 <div class="movie-grid">
     {% for movie in latest_movies %}
-        <div class="movie-card">
-            <a href="{% url 'apps.titles:movie_detail' movie.id %}" style="text-decoration: none; color: inherit; display: block;">
-    
-                {% if movie.poster_url %}
-                    <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="home-poster">
-                {% else %}
-                    <div class="no-poster">No Poster</div>
-                {% endif %}
+        <a href="{% url 'apps.titles:movie_detail' movie.id %}" class="movie-card">
+            {% if movie.poster_url %}
+                <img src="{{ movie.poster_url }}" alt="{{ movie.title }}" class="movie-card-poster">
+            {% else %}
+                <div class="no-poster">No Poster</div>
+            {% endif %}
 
-                <h3 style="margin: 10px 0 5px 0; font-size: 16px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
-                    {{ movie.title }}
-                </h3>
-
-                <div style="display: flex; justify-content: space-between; align-items: center; font-size: 13px; color: #aaa;">
-                    <div>
-                        {{ movie.release_date|date:"Y" }} 
-                        {% if movie.runtime_minutes %}
-                            • {{ movie.runtime_minutes }} min
-                        {% endif %}
-                    </div>
-                    <div style="color: #fff; font-weight: bold;">
-                        <span style="color: var(--imdb-yellow);">★</span> {{ movie.avg_rating|floatformat:1 }}
-                    </div>
+            <div class="movie-card-info">
+                <h3 class="movie-card-title" title="{{ movie.title }}">{{ movie.title }}</h3>
+                <div class="home-movie-meta">
+                    <span>
+                        {{ movie.release_date|date:"Y" }}
+                        {% if movie.runtime_minutes %} • {{ movie.runtime_minutes }} min{% endif %}
+                    </span>
+                    <span class="home-movie-rating">
+                        <span style="color:var(--imdb-yellow);">★</span> {{ movie.avg_rating|floatformat:1 }}
+                    </span>
                 </div>
-            </a>
-        </div>
+            </div>
+        </a>
     {% empty %}
-        <p style="color: #aaa;">No movies found. Go to the Admin panel and add some!</p>
+        <p style="color:#aaa;grid-column:1/-1;">No movies found. Go to the Admin panel and add some!</p>
     {% endfor %}
 </div>
 

@@ -4,37 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}CineVerse{% endblock %}</title>
-    
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
-    <style>
-        /* GLOBAL AUTH & FORM STYLES */
-        .auth-container { display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 40px 20px; }
-        .auth-card { background: var(--imdb-light-gray, #1a1a1a); padding: 40px; border-radius: 8px; width: 100%; max-width: 450px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); border: 1px solid #333; }
-        .auth-header { text-align: center; margin-bottom: 30px; }
-        .auth-header h1 { margin: 0 0 10px 0; color: #fff; font-size: 28px; font-weight: 900; }
-        .auth-header p { color: #aaa; margin: 0; font-size: 14px; line-height: 1.5; }
-        
-        .auth-card form p, .form-group { margin-bottom: 20px; }
-        .auth-card label { display: block; color: #ddd; margin-bottom: 8px; font-size: 14px; font-weight: bold; text-transform: capitalize; }
-        
-        /* Unified Input Styling */
-        .auth-card input[type="text"], .auth-card input[type="password"], 
-        .auth-card input[type="email"], .auth-card input[type="url"],
-        .auth-card input[type="date"], .auth-card textarea, .auth-card input[type="file"] { 
-            width: 100%; background: #111; color: #fff; border: 1px solid #333; border-radius: 4px; padding: 12px; font-size: 16px; box-sizing: border-box; outline: none; 
-        }
-        .auth-card input:focus, .auth-card textarea:focus { border-color: var(--imdb-yellow, #f5c518); }
-        
-        .auth-btn { width: 100%; background-color: var(--imdb-yellow, #f5c518); color: #000; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; transition: background-color 0.2s; }
-        .auth-btn:hover { background-color: #e3b616; }
-        
-        .auth-links { text-align: center; margin-top: 20px; font-size: 14px; }
-        .auth-links a, .cancel-link { color: #5799ef; text-decoration: none; font-weight: bold; transition: color 0.2s; }
-        .auth-links a:hover, .cancel-link:hover { text-decoration: underline; color: #fff; }
-        
-        .errorlist { color: #e74c3c; list-style-type: none; padding: 0; font-size: 13px; margin-bottom: 15px; margin-top: 5px; }
-        .helptext { font-size: 12px; color: #888; display: block; margin-top: 4px; }
-    </style>
     <style>
         :root {
             --imdb-yellow: #F5C518;
@@ -42,8 +12,10 @@
             --imdb-dark-gray: #121212;
             --imdb-light-gray: #252525;
             --text-main: #FFFFFF;
-            --text-muted: #rgba(255,255,255,0.7);
+            --text-muted: rgba(255,255,255,0.7);
         }
+
+        *, *::before, *::after { box-sizing: border-box; }
 
         body {
             background-color: var(--imdb-dark-gray);
@@ -52,8 +24,7 @@
             margin: 0;
             padding: 0;
         }
-
-        /* --- Navbar Styles --- */
+        
         .navbar {
             background-color: var(--imdb-light-gray);
             height: 60px;
@@ -64,6 +35,7 @@
             position: sticky;
             top: 0;
             z-index: 1000;
+            gap: 16px;
         }
 
         .navbar-brand {
@@ -74,62 +46,500 @@
             padding: 4px 8px;
             border-radius: 4px;
             text-decoration: none;
-            margin-right: 20px;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
+        /* Search bar */
         .search-bar {
             flex-grow: 1;
             display: flex;
-            margin: 0 20px;
+            background: #fff;
+            border-radius: 4px;
+            overflow: hidden;
+            min-width: 0;
         }
-
-        .search-input {
-            width: 100%;
+        .search-bar select {
+            background: #fff;
+            border: none;
+            border-right: 1px solid #ccc;
+            padding: 8px 10px;
+            color: #333;
+            font-weight: bold;
+            cursor: pointer;
+            outline: none;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+        .search-bar input[type="text"] {
+            flex-grow: 1;
             padding: 8px 12px;
             border: none;
-            border-radius: 4px 0 0 4px;
+            color: #000;
+            outline: none;
             font-size: 14px;
+            min-width: 0;
+            width: 100%;
         }
-
-        .search-btn {
-            background-color: #fff;
+        .search-bar button {
+            background-color: var(--imdb-yellow);
             border: none;
-            border-left: 1px solid #ccc;
-            padding: 0 15px;
-            border-radius: 0 4px 4px 0;
+            padding: 8px 16px;
             cursor: pointer;
+            flex-shrink: 0;
         }
 
+        /* Nav links */
+        .nav-links {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            gap: 20px;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
         .nav-links a {
             color: var(--text-main);
             text-decoration: none;
-            font-weight: 500;
-            margin-left: 20px;
+            font-weight: bold;
+            font-size: 14px;
+            transition: color 0.2s;
+        }
+        .nav-links a:hover { color: var(--imdb-yellow); }
+
+        /* Avatar */
+        .nav-avatar {
+            width: 28px; height: 28px;
+            border-radius: 50%; object-fit: cover;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+        }
+        .nav-avatar-placeholder {
+            width: 28px; height: 28px;
+            background-color: #5799ef;
+            border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
             font-size: 14px;
         }
 
-        .nav-links a:hover {
-            color: var(--imdb-yellow);
+        /* Hamburger button */
+        .nav-hamburger {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 4px;
+            flex-shrink: 0;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .nav-hamburger span {
+            display: block;
+            width: 22px; height: 2px;
+            background: #fff;
+            border-radius: 2px;
+            transition: all 0.3s;
         }
 
-        /* --- Content Layout --- */
+        /* Mobile drawer */
+        .mobile-menu {
+            display: none;
+            flex-direction: column;
+            background: var(--imdb-light-gray);
+            padding: 16px 20px;
+            border-top: 1px solid #333;
+            gap: 12px;
+        }
+        .mobile-menu.open { display: flex; }
+        .mobile-menu a {
+            color: #fff;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 15px;
+            padding: 6px 0;
+            border-bottom: 1px solid #333;
+        }
+        .mobile-menu a:last-child { border-bottom: none; }
+        .mobile-menu a:hover { color: var(--imdb-yellow); }
+
+        /* Mobile search (inside drawer) */
+        .mobile-search-form {
+            display: flex;
+            background: #fff;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 4px;
+        }
+        .mobile-search-form input[type="text"] {
+            flex-grow: 1;
+            padding: 10px 12px;
+            border: none;
+            color: #000;
+            outline: none;
+            font-size: 14px;
+            min-width: 0;
+        }
+        .mobile-search-form button {
+            background-color: var(--imdb-yellow);
+            border: none;
+            padding: 8px 14px;
+            cursor: pointer;
+        }
+
+        /* ==========================================
+           CONTAINER & MESSAGES
+        ========================================== */
         .container {
             max-width: 1200px;
             margin: 40px auto;
             padding: 0 20px;
         }
 
-        /* --- Flash Messages --- */
         .messages {
             list-style: none;
             padding: 0;
             margin-bottom: 20px;
         }
         .messages li {
-            padding: 10px;
+            padding: 10px 14px;
             border-radius: 4px;
             background-color: var(--imdb-light-gray);
             border-left: 4px solid var(--imdb-yellow);
+            margin-bottom: 8px;
+        }
+
+        /* ==========================================
+           SHARED: SECTION TITLES
+        ========================================== */
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--imdb-yellow);
+            padding-left: 10px;
+        }
+
+        /* ==========================================
+           SHARED: MOVIE CARDS (used across pages)
+        ========================================== */
+        .movie-card {
+            background-color: var(--imdb-light-gray);
+            border-radius: 8px;
+            overflow: hidden;
+            text-decoration: none;
+            display: block;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            border: 1px solid #222;
+        }
+        .movie-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.8);
+            cursor: pointer;
+        }
+        .movie-card-poster {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            object-fit: cover;
+            display: block;
+            border-bottom: 1px solid #222;
+        }
+        .no-poster {
+            width: 100%;
+            aspect-ratio: 2 / 3;
+            background: #111;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #555;
+            font-size: 14px;
+            border-bottom: 1px solid #222;
+        }
+        .movie-card-info { padding: 12px 15px 15px; }
+        .movie-card-title {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .movie-card-meta { font-size: 13px; color: #aaa; }
+
+        /* Shared movie grid */
+        .movie-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 20px;
+        }
+
+        /* ==========================================
+           SHARED: REMOVE BUTTON (watchlist/list)
+        ========================================== */
+        .remove-btn {
+            display: block;
+            width: 100%;
+            text-align: center;
+            background-color: #333;
+            color: #fff;
+            text-decoration: none;
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .remove-btn:hover { background-color: #555; }
+
+        /* ==========================================
+           SHARED: PAGINATION
+        ========================================== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 40px;
+        }
+        .page-btn {
+            background: #333;
+            color: #fff;
+            padding: 10px 15px;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: background 0.2s;
+        }
+        .page-btn:hover { background: var(--imdb-yellow); color: #000; }
+        .page-current {
+            background: var(--imdb-yellow);
+            color: #000;
+            padding: 10px 15px;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        /* ==========================================
+           SHARED: AUTH / FORM CARD
+        ========================================== */
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 70vh;
+            padding: 40px 20px;
+        }
+        .auth-card {
+            background: var(--imdb-light-gray);
+            padding: 40px;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 450px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            border: 1px solid #333;
+        }
+        .auth-header { text-align: center; margin-bottom: 30px; }
+        .auth-header h1 { margin: 0 0 10px 0; color: #fff; font-size: 28px; font-weight: 900; }
+        .auth-header p { color: #aaa; margin: 0; font-size: 14px; line-height: 1.5; }
+
+        /* Unified input styling inside auth cards */
+        .auth-card form p,
+        .form-group { margin-bottom: 20px; }
+
+        .auth-card label,
+        .form-group label {
+            display: block;
+            color: #ddd;
+            margin-bottom: 8px;
+            font-size: 14px;
+            font-weight: bold;
+            text-transform: capitalize;
+        }
+        .auth-card input[type="text"],
+        .auth-card input[type="password"],
+        .auth-card input[type="email"],
+        .auth-card input[type="url"],
+        .auth-card input[type="date"],
+        .auth-card input[type="number"],
+        .auth-card textarea,
+        .auth-card input[type="file"],
+        .form-group input[type="text"],
+        .form-group input[type="password"],
+        .form-group input[type="email"],
+        .form-group input[type="url"],
+        .form-group input[type="date"],
+        .form-group textarea,
+        .form-group input[type="file"] {
+            width: 100%;
+            background: #111;
+            color: #fff;
+            border: 1px solid #333;
+            border-radius: 4px;
+            padding: 12px;
+            font-size: 16px;
+            outline: none;
+        }
+        .auth-card input:focus,
+        .auth-card textarea:focus,
+        .form-group input:focus,
+        .form-group textarea:focus { border-color: var(--imdb-yellow); }
+        .form-group textarea { resize: vertical; }
+
+        /* Auth button */
+        .auth-btn {
+            width: 100%;
+            background-color: var(--imdb-yellow);
+            color: #000;
+            border: none;
+            padding: 14px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+        .auth-btn:hover { background-color: #e3b616; }
+
+        .auth-links { text-align: center; margin-top: 20px; font-size: 14px; }
+        .auth-links a,
+        .cancel-link {
+            color: #5799ef;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.2s;
+        }
+        .auth-links a:hover,
+        .cancel-link:hover { text-decoration: underline; color: #fff; }
+        .cancel-link { display: block; text-align: center; margin-top: 20px; font-size: 14px; }
+
+        .errorlist {
+            color: #e74c3c;
+            list-style-type: none;
+            padding: 0;
+            font-size: 13px;
+            margin-bottom: 15px;
+            margin-top: 5px;
+        }
+        .helptext { font-size: 12px; color: #888; display: block; margin-top: 4px; }
+
+        /* Social sign-in button (Google etc.) */
+        .social-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            background-color: #fff;
+            color: #333;
+            border: none;
+            padding: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 4px;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background-color 0.2s;
+            margin-bottom: 20px;
+        }
+        .social-btn:hover { background-color: #e0e0e0; }
+        .social-btn svg { width: 20px; height: 20px; margin-right: 10px; flex-shrink: 0; }
+
+        /* OR divider */
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            color: #888;
+            font-size: 12px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+        .divider::before,
+        .divider::after { content: ''; flex: 1; border-bottom: 1px solid #333; }
+        .divider:not(:empty)::before { margin-right: 15px; }
+        .divider:not(:empty)::after  { margin-left: 15px; }
+
+        /* ==========================================
+           SHARED: FILTER FORM (browse page)
+        ========================================== */
+        .filter-group { margin-bottom: 20px; }
+        .filter-group label {
+            display: block;
+            color: #fff;
+            font-weight: bold;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .filter-group select,
+        .filter-group input[type="number"] {
+            width: 100%;
+            background: #111;
+            color: #fff;
+            border: 1px solid #444;
+            padding: 10px;
+            border-radius: 4px;
+            font-size: 14px;
+            outline: none;
+        }
+        .filter-group select:focus,
+        .filter-group input:focus { border-color: var(--imdb-yellow); }
+        .filter-btn {
+            width: 100%;
+            background: var(--imdb-yellow);
+            color: #000;
+            font-weight: bold;
+            padding: 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-top: 10px;
+            transition: background 0.2s;
+        }
+        .filter-btn:hover { background: #e3b616; }
+
+        /* Generic inline-form styled page (password reset etc.) */
+        .styled-form p { margin-bottom: 20px; }
+        .styled-form label { display: block; font-size: 12px; color: #aaa; margin-bottom: 5px; }
+        .styled-form input[type="password"],
+        .styled-form input[type="text"],
+        .styled-form input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            border-radius: 4px;
+            border: 1px solid #555;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .styled-form ul { color: #ff4d4d; font-size: 14px; padding-left: 20px; }
+
+        /* ==========================================
+           RESPONSIVE BREAKPOINTS
+        ========================================== */
+        @media (max-width: 768px) {
+            /* Navbar: hide desktop search + links, show hamburger */
+            .navbar { height: auto; padding: 0 16px; flex-wrap: wrap; min-height: 56px; }
+            .navbar > .search-bar { display: none; }
+            .navbar > .nav-links { display: none; }
+            .nav-hamburger { display: flex; margin-left: auto; }
+
+            /* Container */
+            .container { margin: 20px auto; padding: 0 14px; }
+
+            /* Movie grid tightens */
+            .movie-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: 14px; }
+
+            /* Auth card */
+            .auth-card { padding: 28px 20px; }
+            .auth-header h1 { font-size: 22px; }
+
+            /* Section title */
+            .section-title { font-size: 20px; }
+        }
+
+        @media (max-width: 480px) {
+            .movie-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+            .auth-card { padding: 22px 14px; }
         }
     </style>
 </head>
@@ -137,50 +547,61 @@
 
    <nav class="navbar">
         <a href="/" class="navbar-brand">CineVerse</a>
-        
-        <form action="{% url 'apps.search:results' %}" method="GET" style="display: flex; flex-grow: 1; max-width: 800px; margin: 0 20px; background: #fff; border-radius: 4px; overflow: hidden;">
-            
-            <select name="s" onchange="if(this.value === 'browse') { window.location.href='{% url 'apps.titles:browse' %}'; }" style="background: #fff; border: none; padding: 8px 12px; border-right: 1px solid #ccc; color: #333; font-weight: bold; cursor: pointer; outline: none; font-size: 14px;">
+
+        {# Desktop search bar #}
+        <form action="{% url 'apps.search:results' %}" method="GET" class="search-bar">
+            <select name="s" onchange="if(this.value==='browse'){window.location.href='{% url 'apps.titles:browse' %}';}">
                 <option value="all" {% if request.GET.s == 'all' %}selected{% endif %}>All</option>
                 <option value="titles" {% if request.GET.s == 'titles' %}selected{% endif %}>Titles</option>
                 <option value="directors" {% if request.GET.s == 'directors' %}selected{% endif %}>Directors</option>
                 <option value="year" {% if request.GET.s == 'year' %}selected{% endif %}>Year</option>
-                
                 <option value="" disabled>──────────</option>
                 <option value="browse">Advanced Search ➔</option>
             </select>
-            
-            <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search CineVerse" style="flex-grow: 1; padding: 8px 12px; border: none; color: #000; outline: none; font-size: 14px; width: 100%;">
-            
-            <button type="submit" style="background-color: var(--imdb-yellow); border: none; padding: 8px 20px; cursor: pointer;">
-                <span style="color: #000; font-size: 16px; font-weight: bold;">🔍</span>
-            </button>
+            <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search CineVerse">
+            <button type="submit"><span style="color:#000;font-size:16px;font-weight:bold;">🔍</span></button>
         </form>
 
-        <div class="nav-links" style="display: flex; flex-direction: row; align-items: center; gap: 20px; white-space: nowrap; flex-wrap: nowrap;">
-            
-            <a href="{% url 'apps.titles:browse' %}" style="color: #fff; text-decoration: none; font-weight: bold;">Browse</a>
-            
+        {# Desktop nav links #}
+        <div class="nav-links">
+            <a href="{% url 'apps.titles:browse' %}">Browse</a>
             {% if user.is_authenticated %}
-                <a href="{% url 'apps.lists:watchlist' %}" style="color: #fff; text-decoration: none; font-weight: bold;">Watchlist</a> 
-                
-                <a href="{% url 'apps.social:profile' user.username %}" style="display: flex; align-items: center; gap: 8px; color: #fff; text-decoration: none;">
+                <a href="{% url 'apps.lists:watchlist' %}">Watchlist</a>
+                <a href="{% url 'apps.social:profile' user.username %}" style="display:flex;align-items:center;gap:8px;">
                     {% if user.avatar %}
-                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" style="width: 28px; height: 28px; border-radius: 50%; object-fit: cover; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">
+                        <img src="{{ user.avatar.url }}" alt="{{ user.username }}" class="nav-avatar">
                     {% else %}
-                        <div style="width: 28px; height: 28px; background-color: #5799ef; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 14px; box-shadow: 0 2px 4px rgba(0,0,0,0.5);">👤</div>
+                        <div class="nav-avatar-placeholder">👤</div>
                     {% endif %}
-                    
-                    <span style="font-weight: bold; font-size: 14px;">{{ user.username }}</span>
+                    <span>{{ user.username }}</span>
                 </a>
-
-                <a href="{% url 'account_logout' %}" style="color: #fff; text-decoration: none; font-weight: bold;">Sign Out</a>
+                <a href="{% url 'account_logout' %}">Sign Out</a>
             {% else %}
-                <a href="{% url 'account_login' %}" style="color: #fff; text-decoration: none; font-weight: bold;">Sign In</a>
+                <a href="{% url 'account_login' %}">Sign In</a>
             {% endif %}
-            
         </div>
+
+        {# Hamburger button (mobile only) #}
+        <button class="nav-hamburger" id="nav-hamburger" aria-label="Open menu">
+            <span></span><span></span><span></span>
+        </button>
     </nav>
+
+    {# Mobile slide-down menu #}
+    <div class="mobile-menu" id="mobile-menu">
+        <form action="{% url 'apps.search:results' %}" method="GET" class="mobile-search-form">
+            <input type="text" name="q" value="{{ request.GET.q|default:'' }}" placeholder="Search CineVerse">
+            <button type="submit">🔍</button>
+        </form>
+        <a href="{% url 'apps.titles:browse' %}">Browse</a>
+        {% if user.is_authenticated %}
+            <a href="{% url 'apps.lists:watchlist' %}">Watchlist</a>
+            <a href="{% url 'apps.social:profile' user.username %}">{{ user.username }}</a>
+            <a href="{% url 'account_logout' %}">Sign Out</a>
+        {% else %}
+            <a href="{% url 'account_login' %}">Sign In</a>
+        {% endif %}
+    </div>
 
     <div class="container">
         {% if messages %}
@@ -194,13 +615,20 @@
         {% block content %}
         {% endblock content %}
     </div>
+
     <script>
-        // Detect if the page was loaded from the browser's Back/Forward cache
-        window.addEventListener("pageshow", function (event) {
-            // event.persisted is true if the browser loaded the page from cache
-            if (event.persisted) {
-                window.location.reload(); // Force a fresh request to Django
-            }
+        // Hamburger toggle
+        const hamburger = document.getElementById('nav-hamburger');
+        const mobileMenu = document.getElementById('mobile-menu');
+        if (hamburger && mobileMenu) {
+            hamburger.addEventListener('click', function() {
+                mobileMenu.classList.toggle('open');
+            });
+        }
+
+        // Back-forward cache reload
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted) { window.location.reload(); }
         });
     </script>
 

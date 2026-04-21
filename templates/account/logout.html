@@ -4,20 +4,8 @@
 {% block title %}Sign Out - CineVerse{% endblock %}
 
 {% block content %}
-<style>
-    .auth-container { display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 20px; }
-    .auth-card { background: var(--imdb-light-gray, #1a1a1a); padding: 40px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); border: 1px solid #333; text-align: center; }
-    .auth-header { margin-bottom: 30px; }
-    .auth-header h1 { margin: 0 0 10px 0; color: #fff; font-size: 28px; font-weight: 900; }
-    .auth-header p { color: #aaa; margin: 0; font-size: 16px; line-height: 1.5; }
-    .auth-btn { width: 100%; background-color: var(--imdb-yellow, #f5c518); color: #000; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 20px; transition: background-color 0.2s; }
-    .auth-btn:hover { background-color: #e3b616; }
-    .cancel-link { display: inline-block; margin-top: 20px; color: #5799ef; text-decoration: none; font-size: 14px; font-weight: bold; }
-    .cancel-link:hover { text-decoration: underline; }
-</style>
-
 <div class="auth-container">
-    <div class="auth-card">
+    <div class="auth-card" style="text-align:center;">
         <div class="auth-header">
             <h1>Sign Out</h1>
             <p>{% trans 'Are you sure you want to sign out?' %}</p>
@@ -26,7 +14,7 @@
         <form method="post" action="{% url 'account_logout' %}">
             {% csrf_token %}
             {% if redirect_field_value %}
-            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}"/>
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
             {% endif %}
             <button class="auth-btn" type="submit">{% trans 'Sign Out' %}</button>
         </form>

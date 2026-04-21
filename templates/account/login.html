@@ -1,43 +1,10 @@
 {% extends "base.html" %}
 {% load i18n %}
-{% load socialaccount %} 
+{% load socialaccount %}
 
 {% block title %}Log In - CineVerse{% endblock %}
 
 {% block content %}
-<style>
-    .auth-container { display: flex; justify-content: center; align-items: center; min-height: 70vh; padding: 20px; }
-    .auth-card { background: var(--imdb-light-gray, #1a1a1a); padding: 40px; border-radius: 8px; width: 100%; max-width: 400px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); border: 1px solid #333; }
-    .auth-header { text-align: center; margin-bottom: 30px; }
-    .auth-header h1 { margin: 0 0 10px 0; color: #fff; font-size: 28px; font-weight: 900; }
-    .auth-header p { color: #aaa; margin: 0; font-size: 14px; }
-    
-    /* Social Button Styles */
-    .social-btn { display: flex; align-items: center; justify-content: center; width: 100%; background-color: #fff; color: #333; border: none; padding: 12px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; text-decoration: none; transition: background-color 0.2s; margin-bottom: 20px; }
-    .social-btn:hover { background-color: #e0e0e0; }
-    .social-btn svg { width: 20px; height: 20px; margin-right: 10px; }
-    
-    /* Divider Styles */
-    .divider { display: flex; align-items: center; text-align: center; color: #888; font-size: 12px; font-weight: bold; margin-bottom: 20px; }
-    .divider::before, .divider::after { content: ''; flex: 1; border-bottom: 1px solid #333; }
-    .divider:not(:empty)::before { margin-right: 15px; }
-    .divider:not(:empty)::after { margin-left: 15px; }
-
-    /* Target the Django form fields */
-    .auth-card form p { margin-bottom: 15px; }
-    .auth-card label { display: block; color: #ddd; margin-bottom: 5px; font-size: 14px; font-weight: bold; }
-    .auth-card input[type="text"], .auth-card input[type="password"], .auth-card input[type="email"] { width: 100%; background: #111; color: #fff; border: 1px solid #333; border-radius: 4px; padding: 12px; font-size: 16px; box-sizing: border-box; }
-    .auth-card input[type="text"]:focus, .auth-card input[type="password"]:focus, .auth-card input[type="email"]:focus { outline: none; border-color: var(--imdb-yellow, #f5c518); }
-    
-    .auth-btn { width: 100%; background-color: var(--imdb-yellow, #f5c518); color: #000; border: none; padding: 14px; font-size: 16px; font-weight: bold; border-radius: 4px; cursor: pointer; margin-top: 10px; transition: background-color 0.2s; }
-    .auth-btn:hover { background-color: #e3b616; }
-    .auth-links { text-align: center; margin-top: 20px; font-size: 14px; }
-    .auth-links a { color: #5799ef; text-decoration: none; }
-    .auth-links a:hover { text-decoration: underline; }
-    .helptext { font-size: 12px; color: #888; display: block; margin-top: 4px; }
-    .errorlist { color: #e74c3c; list-style-type: none; padding: 0; font-size: 13px; margin-bottom: 15px; }
-</style>
-
 <div class="auth-container">
     <div class="auth-card">
         <div class="auth-header">
@@ -59,21 +26,18 @@
 
         <form class="login" method="POST" action="{% url 'account_login' %}">
             {% csrf_token %}
-            
             {{ form.as_p }}
-            
             {% if redirect_field_value %}
-            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
             {% endif %}
-            
             <button class="auth-btn" type="submit">{% trans "Sign In" %}</button>
         </form>
 
         <div class="auth-links">
-            <p style="color: #aaa; margin-bottom: 10px;">
+            <p style="color:#aaa;margin-bottom:10px;">
                 <a href="{% url 'account_reset_password' %}">Forgot Password?</a>
             </p>
-            <p style="color: #aaa; margin: 0;">
+            <p style="color:#aaa;margin:0;">
                 New to CineVerse? <a href="{% url 'account_signup' %}">Create an account</a>
             </p>
         </div>
