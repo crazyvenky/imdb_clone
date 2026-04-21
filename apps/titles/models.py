@@ -33,7 +33,9 @@ class Title(BaseModel):
     tmdb_id = models.IntegerField(unique=True, null=True, blank=True)
     popularity = models.FloatField(default=0.0)
     poster_path = models.CharField(max_length=255, null=True, blank=True)
+    backdrop_path = models.CharField(max_length=255, null=True, blank=True)
     trailer_key = models.CharField(max_length=100, null=True, blank=True)
+    
 
     # Denormalized Aggregates (Updated via Interactions Service later)
     avg_rating = models.DecimalField(max_digits=4, decimal_places=2, default=0.00)
@@ -52,14 +54,18 @@ class Title(BaseModel):
     def __str__(self):
         return self.title
 
-    # Dynamic URL Property - Saves EC2 storage by hotlinking TMDB's CDN
     @property
     def poster_url(self):
         if self.poster_path:
             return f"https://image.tmdb.org/t/p/w500{self.poster_path}"
-        elif self.poster: # Fallback to local uploaded poster if it exists
+        elif self.poster:
             return self.poster.url
         return None
+    @property
+    def backdrop_url(self):
+        if self.backdrop_path:
+            return f"https://image.tmdb.org/t/p/w1280{self.backdrop_path}"
+        return self.poster_url
 class TitleCast(BaseModel):
     """Bridge table connecting a Person to a Title with a specific role."""
     class RoleType(models.TextChoices):

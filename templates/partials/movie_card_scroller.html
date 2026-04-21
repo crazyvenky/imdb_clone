@@ -1,0 +1,13 @@
+<a href="{% url 'apps.titles:movie_detail' item.id %}" class="movie-card" style="text-decoration: none; display: block;">
+    {% if item.poster_url %}
+        <img src="{{ item.poster_url }}" alt="{{ item.title }}" class="movie-card-poster">
+    {% else %}
+        <div class="no-poster">No Image</div>
+    {% endif %}
+    <div class="movie-card-info">
+        <h3 class="movie-card-title">{{ item.title }}</h3>
+        <div class="movie-card-meta">
+            <span style="color: var(--imdb-yellow);">★</span> {{ item.avg_rating|default:"--" }}
+        </div>
+    </div>
+</a>

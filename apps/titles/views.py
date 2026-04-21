@@ -8,11 +8,39 @@ from apps.lists.models import CustomList, CustomListItem, Watchlist
 from apps.search.utils import fetch_tmdb_details, sync_tmdb_details
 
 def home_view(request):
-    latest_movies = Title.objects.filter(
-        type=Title.TitleType.MOVIE,
+    # 1. The Hero Movie: Grab the #1 most popular movie that actually has a backdrop image
+    hero_movie = Title.objects.filter(
+    type=Title.TitleType.MOVIE, 
+    is_deleted=False, 
+    backdrop_path__isnull=False
+    ).order_by('-popularity').first()
+
+    # 2. Trending Now: Top 15 most popular movies
+    trending_movies = Title.objects.filter(
+        type=Title.TitleType.MOVIE, 
         is_deleted=False
-    ).prefetch_related('genres').order_by('-release_date')[:12]
-    context = {'latest_movies': latest_movies}
+    ).order_by('-popularity')[:15]
+
+    # 3. All-Time Greats: Top 15 highest rated (requiring at least 5 reviews so obscure movies don't win)
+    top_rated = Title.objects.filter(
+        type=Title.TitleType.MOVIE, 
+        is_deleted=False,
+        rating_count__gte=5
+    ).order_by('-avg_rating')[:15]
+
+    # 4. Jump Back In: The user's specific watchlist (if logged in)
+    user_watchlist = []
+    if request.user.is_authenticated:
+        # Fetch the watchlist items, then extract just the titles for the template
+        watchlist_items = Watchlist.objects.filter(user=request.user).select_related('title').order_by('-created_at')[:15]
+        user_watchlist = [item.title for item in watchlist_items]
+
+    context = {
+        'hero_movie': hero_movie,
+        'trending_movies': trending_movies,
+        'top_rated': top_rated,
+        'user_watchlist': user_watchlist,
+    }
     return render(request, 'titles/home.html', context)
 
 def movie_detail_view(request, pk):
