@@ -9,7 +9,7 @@ urlpatterns = [
     path('', include('apps.titles.urls')),
     path('lists/', include('apps.lists.urls')),
     path('search/', include('apps.search.urls')),
-    path('social/',include('apps.social.urls'))
+    path('social/',include('apps.social.urls')),   
 ]
 
 if settings.DEBUG:

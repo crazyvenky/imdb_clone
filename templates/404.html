@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>404 - Lost in the CineVerse</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+            overflow: hidden;
+            font-family: 'Roboto', sans-serif;
+            color: #fff;
+            cursor: none; /* THE FIX: Hides the default pointer completely */
+        }
+
+        /* --- THE MOUSE TRACKER AVATAR --- */
+        #cursor-avatar {
+            position: fixed; /* Fixed prevents scrollbar jumping */
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            object-fit: cover;
+            /* CRITICAL: This ensures the image doesn't block the mouse from clicking links! */
+            pointer-events: none; 
+            z-index: 9999;
+            /* Centers the image directly exactly on the tip of the mouse pointer */
+            transform: translate(-50%, -50%); 
+            opacity: 0; /* Hidden until the mouse actually moves */
+            transition: opacity 0.3s ease;
+            box-shadow: 0 0 15px rgba(245, 197, 24, 0.6);
+            border: 2px solid var(--imdb-yellow, #f5c518);
+        }
+
+        .avatar-placeholder {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #5799ef;
+            font-size: 20px;
+        }
+
+        /* The floating animation engine */
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(2deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+
+        /* Drifting stars background */
+        .stars {
+            position: absolute;
+            top: -50%; left: -50%; width: 200%; height: 200%;
+            background: transparent url('data:image/svg+xml;utf8,<svg width="300" height="300" xmlns="http://www.w3.org/2000/svg"><circle cx="20" cy="20" r="1.5" fill="white" opacity="0.8"/><circle cx="150" cy="80" r="1" fill="white" opacity="0.5"/><circle cx="250" cy="200" r="2" fill="white" opacity="0.3"/></svg>') repeat;
+            animation: drift 150s linear infinite;
+            z-index: 0;
+        }
+
+        @keyframes drift {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        /* Wrappers to position items freely in space */
+        .space-item { position: absolute; z-index: 10; }
+        .floater { animation: float 6s ease-in-out infinite; }
+
+        /* --- SPECIFIC ELEMENTS --- */
+        .main-error {
+            top: 25%; left: 50%; margin-left: -200px;
+            width: 400px; text-align: center;
+        }
+        .main-error h1 {
+            font-size: 8rem; margin: 0; font-weight: 900;
+            color: var(--imdb-yellow, #f5c518);
+            text-shadow: 0 0 30px rgba(245, 197, 24, 0.4);
+        }
+        .main-error p { font-size: 1.5rem; color: #aaa; margin-top: -10px; }
+
+        .brand-text {
+            bottom: 5%; left: 50%; margin-left: -150px;
+            width: 300px; text-align: center; font-size: 2.5rem; font-weight: 900;
+            color: rgba(255, 255, 255, 0.05); letter-spacing: 5px; animation-delay: 2s;
+        }
+
+        /* --- THE FLOATING LINKS --- */
+        .space-link {
+            text-decoration: none; color: #fff;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 25px; border-radius: 30px; font-size: 1.1rem; font-weight: bold;
+            backdrop-filter: blur(5px); transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); display: inline-block;
+            cursor: none; /* THE FIX: Stops the pointer from turning into a hand */
+        }
+
+        .space-link:hover {
+            background: var(--imdb-yellow, #f5c518); color: #000;
+            border-color: var(--imdb-yellow, #f5c518);
+            transform: scale(1.1); box-shadow: 0 0 20px rgba(245, 197, 24, 0.4);
+        }
+
+        .pos-1 { top: 60%; left: 20%; } .pos-1 .floater { animation-delay: 0s; animation-duration: 5s; }
+        .pos-2 { top: 50%; right: 20%; } .pos-2 .floater { animation-delay: 1.5s; animation-duration: 7s; }
+        .pos-3 { top: 75%; left: 45%; } .pos-3 .floater { animation-delay: 0.8s; animation-duration: 6.5s; }
+        .pos-4 { top: 30%; left: 15%; } .pos-4 .floater { animation-delay: 2.2s; animation-duration: 5.5s; }
+        .pos-5 { top: 35%; right: 15%; } .pos-5 .floater { animation-delay: 0.5s; animation-duration: 6s; }
+
+        @media (max-width: 768px) {
+            .main-error h1 { font-size: 6rem; }
+            .pos-1 { top: 55%; left: 10%; } .pos-2 { top: 45%; right: 10%; }
+            .pos-3 { top: 80%; left: 30%; } .pos-4 { top: 20%; left: 10%; } .pos-5 { top: 25%; right: 10%; }
+            /* Hide the cursor tracker on mobile devices since there is no mouse */
+            #cursor-avatar { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    {% if request.user.is_authenticated and request.user.avatar %}
+        <img src="{{ request.user.avatar.url }}" id="cursor-avatar" alt="You">
+    {% else %}
+        <div id="cursor-avatar" class="avatar-placeholder">👤</div>
+    {% endif %}
+
+    <div class="stars"></div>
+
+    <div class="space-item main-error">
+        <div class="floater">
+            <h1>404</h1>
+            <p>Lost in Space</p>
+        </div>
+    </div>
+
+    <div class="space-item brand-text">
+        <div class="floater">CINEVERSE</div>
+    </div>
+
+    <div class="space-item pos-1"><div class="floater"><a href="/" class="space-link">Return Home</a></div></div>
+    <div class="space-item pos-2"><div class="floater"><a href="{% url 'apps.titles:browse' %}" class="space-link">Browse Movies</a></div></div>
+    <div class="space-item pos-3"><div class="floater"><a href="{% url 'apps.lists:public_lists' %}" class="space-link">Community Lists</a></div></div>
+    <div class="space-item pos-4"><div class="floater"><a href="{% url 'apps.lists:watchlist' %}" class="space-link">My Library</a></div></div>
+    <div class="space-item pos-5">
+        <div class="floater">
+            {% if request.user.is_authenticated %}
+                <a href="{% url 'apps.social:profile' request.user.username %}" class="space-link">My Profile</a>
+            {% else %}
+                <a href="{% url 'account_login' %}" class="space-link">Sign In</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const avatar = document.getElementById('cursor-avatar');
+            
+            // Only run the tracker if we aren't on a mobile touch device
+            if (window.matchMedia("(pointer: fine)").matches) {
+                document.addEventListener('mousemove', (e) => {
+                    // Make it visible the second the mouse moves
+                    avatar.style.opacity = '1';
+                    // Track X and Y coordinates instantly
+                    avatar.style.left = e.clientX + 'px';
+                    avatar.style.top = e.clientY + 'px';
+                });
+
+                // Hide it if the mouse leaves the browser window entirely
+                document.addEventListener('mouseleave', () => {
+                    avatar.style.opacity = '0';
+                });
+            }
+        });
+    </script>
+</body>
+</html>

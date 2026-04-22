@@ -62,7 +62,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
-    # custom
+
     'apps.accounts.middleware.ProxyIPMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'apps.accounts.middleware.EnforceDomainMiddleware',
@@ -74,8 +74,6 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    
-    
 ]
 
 ROOT_URLCONF = 'config.urls'
