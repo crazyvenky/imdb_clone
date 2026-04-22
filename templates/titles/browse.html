@@ -4,66 +4,249 @@
 
 {% block content %}
 <style>
+    /* ── Layout ─────────────────────────────────────────── */
     .browse-layout {
         display: flex;
         gap: 30px;
         align-items: flex-start;
     }
+
+    /* ── Sidebar ─────────────────────────────────────────── */
     .sidebar {
-        width: 260px;
+        width: 270px;
         flex-shrink: 0;
         background: var(--imdb-light-gray);
-        padding: 25px;
-        border-radius: 8px;
-        border: 1px solid #333;
+        padding: 24px;
+        border-radius: 12px;
+        border: 1px solid #2e2e2e;
         position: sticky;
-        top: 76px; /* below fixed navbar */
+        top: 76px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.4);
     }
     .sidebar-heading {
         color: #fff;
         margin: 0 0 20px 0;
-        font-size: 20px;
-        border-bottom: 1px solid #333;
-        padding-bottom: 10px;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        border-bottom: 2px solid var(--imdb-yellow);
+        padding-bottom: 12px;
     }
-    .year-range { display: flex; gap: 10px; }
-    .year-range input { flex: 1; }
+
+    /* ── Filter groups ───────────────────────────────────── */
+    .filter-group {
+        margin-bottom: 20px;
+    }
+    .filter-group label {
+        display: block;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: #999;
+        margin-bottom: 8px;
+    }
+    .filter-group select,
+    .filter-group input[type="number"] {
+        width: 100%;
+        background: #1a1a1a;
+        color: #fff;
+        border: 1px solid #3a3a3a;
+        border-radius: 6px;
+        padding: 9px 12px;
+        font-size: 14px;
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.2s, box-shadow 0.2s;
+        appearance: none;
+        -webkit-appearance: none;
+    }
+    .filter-group select {
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23999' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+        background-repeat: no-repeat;
+        background-position: right 12px center;
+        padding-right: 32px;
+    }
+    .filter-group select:focus,
+    .filter-group input[type="number"]:focus {
+        border-color: var(--imdb-yellow);
+        box-shadow: 0 0 0 3px rgba(245, 197, 24, 0.15);
+    }
+    .filter-group select option {
+        background: #1e1e1e;
+        color: #fff;
+    }
+
+    /* ── Year range ──────────────────────────────────────── */
+    .year-range {
+        display: flex;
+        gap: 10px;
+    }
+    .year-range input {
+        flex: 1;
+    }
+    .year-range input::placeholder {
+        color: #555;
+        font-size: 12px;
+    }
+
+    /* ── Apply Filters button ────────────────────────────── */
+    .filter-btn {
+        display: block;
+        width: 100%;
+        padding: 11px 0;
+        background: var(--imdb-yellow);
+        color: #000;
+        font-size: 14px;
+        font-weight: 700;
+        font-family: inherit;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        letter-spacing: 0.04em;
+        transition: background 0.2s, transform 0.15s;
+        margin-top: 4px;
+    }
+    .filter-btn:hover {
+        background: #e0b415;
+        transform: translateY(-1px);
+    }
+    .filter-btn:active {
+        transform: translateY(0);
+    }
+
+    /* ── Clear All link ──────────────────────────────────── */
     .clear-link {
         display: block;
         text-align: center;
-        color: #888;
+        color: #666;
         text-decoration: none;
-        margin-top: 15px;
-        font-size: 13px;
+        margin-top: 14px;
+        font-size: 12px;
+        letter-spacing: 0.04em;
+        transition: color 0.2s;
     }
-    .clear-link:hover { color: #fff; }
+    .clear-link:hover {
+        color: #ccc;
+    }
 
-    .results-area { flex-grow: 1; min-width: 0; }
-    .results-heading { color: #fff; margin: 0 0 20px 0; font-size: 28px; }
-    .results-count { color: #666; font-size: 18px; }
-
-    /* Filter toggle button (mobile) */
+    /* ── Filter toggle button (mobile) ───────────────────── */
     .filter-toggle {
         display: none;
         width: 100%;
         background: var(--imdb-light-gray);
         color: #fff;
         border: 1px solid #333;
-        padding: 12px;
+        padding: 12px 16px;
         border-radius: 8px;
-        font-weight: bold;
-        font-size: 15px;
+        font-weight: 700;
+        font-size: 14px;
+        font-family: inherit;
         cursor: pointer;
         margin-bottom: 16px;
         text-align: left;
+        transition: background 0.2s, border-color 0.2s;
+    }
+    .filter-toggle:hover {
+        background: #2e2e2e;
+        border-color: #555;
     }
 
+    /* ── Results area ────────────────────────────────────── */
+    .results-area {
+        flex-grow: 1;
+        min-width: 0;
+    }
+    .results-heading {
+        color: #fff;
+        margin: 0 0 22px 0;
+        font-size: 28px;
+        font-weight: 700;
+    }
+    .results-count {
+        color: #666;
+        font-size: 18px;
+        font-weight: 400;
+    }
+
+    /* ── Movie card rating row ───────────────────────────── */
+    .card-rating {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #fff;
+        font-weight: 700;
+        font-size: 14px;
+        margin-bottom: 6px;
+    }
+    .card-rating .star {
+        color: var(--imdb-yellow);
+        font-size: 15px;
+        line-height: 1;
+    }
+
+    /* ── Empty state ─────────────────────────────────────── */
+    .empty-state {
+        background: #111;
+        padding: 60px 30px;
+        text-align: center;
+        border-radius: 12px;
+        border: 1px solid #2e2e2e;
+    }
+    .empty-state h3 {
+        color: #666;
+        margin: 0;
+        font-size: 18px;
+        font-weight: 500;
+    }
+
+    /* ── Pagination ──────────────────────────────────────── */
+    .pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        margin-top: 40px;
+        padding-top: 24px;
+        border-top: 1px solid #2e2e2e;
+    }
+    .page-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 9px 20px;
+        background: var(--imdb-light-gray);
+        color: #fff;
+        text-decoration: none;
+        border-radius: 6px;
+        font-size: 14px;
+        font-weight: 600;
+        border: 1px solid #3a3a3a;
+        transition: background 0.2s, border-color 0.2s, transform 0.15s;
+    }
+    .page-btn:hover {
+        background: #333;
+        border-color: var(--imdb-yellow);
+        color: var(--imdb-yellow);
+        transform: translateY(-1px);
+    }
+    .page-current {
+        font-size: 14px;
+        color: #888;
+        padding: 9px 16px;
+        background: #181818;
+        border: 1px solid #2e2e2e;
+        border-radius: 6px;
+    }
+
+    /* ── Responsive ──────────────────────────────────────── */
     @media (max-width: 900px) {
         .browse-layout { flex-direction: column; }
         .sidebar {
             width: 100%;
             position: static;
-            display: none; /* hidden by default on mobile until toggled */
+            display: none;
         }
         .sidebar.open { display: block; }
         .filter-toggle { display: block; }
@@ -73,6 +256,7 @@
     @media (max-width: 480px) {
         .results-heading { font-size: 18px; }
         .results-count { font-size: 14px; }
+        .pagination { flex-wrap: wrap; }
     }
 </style>
 
@@ -146,8 +330,8 @@
                             <div class="no-poster">No Poster</div>
                         {% endif %}
                         <div class="movie-card-info">
-                            <div style="color:#fff;font-weight:bold;margin-bottom:6px;font-size:14px;display:flex;align-items:center;gap:5px;">
-                                <span style="color:var(--imdb-yellow);font-size:16px;">★</span> {{ movie.avg_rating|floatformat:1 }}
+                            <div class="card-rating">
+                                <span class="star">★</span> {{ movie.avg_rating|floatformat:1 }}
                             </div>
                             <h3 class="movie-card-title" title="{{ movie.title }}">{{ movie.title }}</h3>
                             <div class="movie-card-meta">{{ movie.release_date|date:"Y" }}</div>
@@ -169,8 +353,8 @@
             {% endif %}
 
         {% else %}
-            <div style="background:#111;padding:50px;text-align:center;border-radius:8px;border:1px solid #333;">
-                <h3 style="color:#aaa;margin:0;">No movies match your filters.</h3>
+            <div class="empty-state">
+                <h3>No movies match your filters.</h3>
             </div>
         {% endif %}
     </div>
