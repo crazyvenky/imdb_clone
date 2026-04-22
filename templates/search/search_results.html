@@ -1,63 +1,152 @@
 {% extends 'base.html' %}
 
-{% block title %}Find - CineVerse{% endblock %}
+{% block title %}
+    {% if query %}Search: "{{ query }}" - CineVerse{% else %}Search - CineVerse{% endif %}
+{% endblock %}
 
 {% block content %}
 <style>
-    .search-header { font-size: 26px; font-weight: 400; margin-bottom: 24px; color: #fff; }
-    .search-highlight { color: var(--imdb-yellow); font-weight: bold; }
-
-    .results-box {
-        background: var(--imdb-light-gray);
-        border-radius: 8px;
-        padding: 20px;
-        border: 1px solid #222;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    /* ── Page heading ─────────────────────────────────────── */
+    .search-header {
+        font-size: 26px;
+        font-weight: 400;
+        margin-bottom: 24px;
+        color: #fff;
+    }
+    .search-highlight {
+        color: var(--imdb-yellow);
+        font-weight: 700;
     }
 
+    /* ── Results card ─────────────────────────────────────── */
+    .results-box {
+        background: var(--imdb-light-gray);
+        border-radius: 10px;
+        padding: 20px;
+        border: 1px solid #2e2e2e;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+    .results-box .section-title {
+        margin-top: 0;
+    }
+
+    /* ── Result list wrapper ──────────────────────────────── */
+    .results-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    /* ── Individual result row ────────────────────────────── */
     .result-item {
         display: flex;
         gap: 16px;
-        padding: 14px;
-        border-bottom: 1px solid #333;
+        padding: 12px;
+        border-bottom: 1px solid #2a2a2a;
         border-radius: 6px;
         text-decoration: none;
-        transition: background-color 0.2s, transform 0.2s;
+        transition: background-color 0.18s, transform 0.18s;
     }
-    .result-item:hover { background-color: #222; transform: translateX(4px); border-bottom-color: transparent; }
-    .result-item:last-child { border-bottom: none; }
+    .result-item:hover {
+        background-color: #222;
+        transform: translateX(4px);
+        border-bottom-color: transparent;
+    }
+    .result-item:last-child {
+        border-bottom: none;
+    }
 
+    /* ── Poster thumbnail ─────────────────────────────────── */
     .result-poster {
-        width: 64px;
+        width: 60px;
         aspect-ratio: 2/3;
         object-fit: cover;
         border-radius: 4px;
-        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
         flex-shrink: 0;
+        display: block;
     }
     .result-no-poster {
-        width: 64px;
+        width: 60px;
         aspect-ratio: 2/3;
         background: #111;
         border-radius: 4px;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 11px; color: #555; text-align: center;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        color: #444;
+        text-align: center;
         border: 1px solid #222;
         flex-shrink: 0;
     }
 
-    .result-info { display: flex; flex-direction: column; justify-content: center; min-width: 0; }
-    .result-title { font-size: 17px; font-weight: bold; color: #fff; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .result-meta { font-size: 13px; color: #aaa; margin-bottom: 6px; }
-    .result-meta .sep { margin: 0 5px; color: #555; }
-    .result-rating { font-size: 13px; color: #fff; font-weight: bold; display: flex; align-items: center; gap: 5px; }
-    .star { color: var(--imdb-yellow); }
+    /* ── Info column ──────────────────────────────────────── */
+    .result-info {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        min-width: 0;
+        gap: 4px;
+    }
+    .result-title {
+        font-size: 17px;
+        font-weight: 700;
+        color: #fff;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: color 0.15s;
+    }
+    .result-item:hover .result-title {
+        color: var(--imdb-yellow);
+    }
+    .result-meta {
+        font-size: 13px;
+        color: #666;
+    }
+    .result-meta .sep {
+        margin: 0 5px;
+        color: #444;
+    }
+    .result-rating {
+        font-size: 13px;
+        color: #aaa;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+    }
+    .result-rating .star {
+        color: var(--imdb-yellow);
+    }
 
-    .no-results { padding: 40px 20px; text-align: center; }
+    /* ── Empty state ──────────────────────────────────────── */
+    .no-results {
+        padding: 48px 20px;
+        text-align: center;
+    }
+    .no-results-main {
+        color: #aaa;
+        font-size: 16px;
+        margin: 0 0 8px 0;
+    }
+    .no-results-hint {
+        color: #555;
+        font-size: 14px;
+        margin: 0;
+    }
+    .no-results-query {
+        color: #fff;
+        font-weight: bold;
+    }
 
+    /* ── Responsive ───────────────────────────────────────── */
     @media (max-width: 480px) {
-        .search-header { font-size: 20px; }
-        .result-title { font-size: 15px; }
+        .search-header   { font-size: 20px; }
+        .result-title    { font-size: 15px; }
+        .result-poster,
+        .result-no-poster { width: 50px; }
     }
 </style>
 
@@ -69,11 +158,13 @@
     <h2 class="section-title">Titles</h2>
 
     {% if results %}
-        <div style="display:flex;flex-direction:column;gap:4px;">
+        <div class="results-list">
             {% for movie in results %}
                 <a href="{% url 'apps.titles:movie_detail' movie.id %}" class="result-item">
                     {% if movie.poster_url %}
-                        <img src="{{ movie.poster_url }}" class="result-poster" alt="{{ movie.title }}">
+                        <img src="{{ movie.poster_url }}"
+                             class="result-poster"
+                             alt="{{ movie.title }}">
                     {% else %}
                         <div class="result-no-poster">No Image</div>
                     {% endif %}
@@ -82,10 +173,13 @@
                         <div class="result-title">{{ movie.title }}</div>
                         <div class="result-meta">
                             {{ movie.release_date|date:"Y" }}
-                            {% if movie.runtime_minutes %}<span class="sep">•</span> {{ movie.runtime_minutes }} min{% endif %}
+                            {% if movie.runtime_minutes %}
+                                <span class="sep">•</span> {{ movie.runtime_minutes }} min
+                            {% endif %}
                         </div>
                         <div class="result-rating">
-                            <span class="star">★</span> {{ movie.avg_rating|floatformat:1 }}
+                            <span class="star">★</span>
+                            {{ movie.avg_rating|floatformat:1 }}
                         </div>
                     </div>
                 </a>
@@ -93,8 +187,13 @@
         </div>
     {% else %}
         <div class="no-results">
-            <p style="color:#aaa;font-size:16px;margin:0;">No exact matches found for "<span style="color:#fff;">{{ query }}</span>".</p>
-            <p style="color:#666;font-size:14px;margin-top:8px;">Try checking your spelling or using different keywords.</p>
+            <p class="no-results-main">
+                No exact matches found for
+                "<span class="no-results-query">{{ query }}</span>".
+            </p>
+            <p class="no-results-hint">
+                Try checking your spelling or using different keywords.
+            </p>
         </div>
     {% endif %}
 </div>

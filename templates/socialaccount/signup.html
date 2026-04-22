@@ -7,21 +7,28 @@
 <div class="auth-container">
     <div class="auth-card">
         <div class="auth-header">
+            <div style="font-size: 36px; margin-bottom: 12px;">🎬</div>
             <h1>Almost Done!</h1>
-            <p>You are signing in with Google.<br>Please confirm your username to complete your CineVerse account.</p>
+            <p>You're signing in with Google. Confirm your username to complete your CineVerse account.</p>
         </div>
 
         <form class="signup" id="signup_form" method="post" action="{% url 'socialaccount_signup' %}">
             {% csrf_token %}
-            
+
             {{ form.as_p }}
-            
+
             {% if redirect_field_value %}
-            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+                <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
             {% endif %}
-            
+
             <button class="auth-btn" type="submit">{% trans "Complete Sign Up" %}</button>
         </form>
+
+        <div class="auth-links">
+            <p style="color:#aaa; margin:0;">
+                Not you? <a href="{% url 'account_login' %}">Go back</a>
+            </p>
+        </div>
     </div>
 </div>
 {% endblock %}

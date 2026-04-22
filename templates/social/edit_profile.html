@@ -3,25 +3,110 @@
 {% block title %}Edit Profile - CineVerse{% endblock %}
 
 {% block content %}
+<style>
+    /* File input widget needs special treatment — browser-native file pickers
+       ignore most CSS. We style the wrapper and let accent-color handle the button. */
+    .form-group input[type="file"] {
+        background: transparent;
+        border: 1px dashed #3a3a3a;
+        padding: 12px;
+        color: #888;
+        cursor: pointer;
+        border-radius: 6px;
+        width: 100%;
+        box-sizing: border-box;
+        font-size: 13px;
+        transition: border-color 0.2s;
+    }
+    .form-group input[type="file"]:hover {
+        border-color: var(--imdb-yellow);
+        color: #fff;
+    }
+
+    /* Avatar preview shown below the file input */
+    .avatar-preview {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 2px solid #333;
+        margin-bottom: 12px;
+        display: block;
+    }
+    .avatar-placeholder {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: #5799ef;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        margin-bottom: 12px;
+    }
+
+    /* Section divider */
+    .form-section-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: #555;
+        border-top: 1px solid #2e2e2e;
+        padding-top: 20px;
+        margin: 20px 0 16px 0;
+    }
+</style>
+
 <div class="auth-container">
-    <div class="auth-card" style="max-width:520px;">
+    <div class="auth-card" style="max-width: 520px;">
         <div class="auth-header">
+            <div style="font-size: 32px; margin-bottom: 10px;">✏️</div>
             <h1>Edit Profile</h1>
         </div>
 
-        <form method="POST" action="{% url 'apps.social:edit_profile' %}" enctype="multipart/form-data">
+        {# Avatar preview #}
+        <div style="text-align: center; margin-bottom: 20px;">
+            {% if request.user.avatar %}
+                <img src="{{ request.user.avatar.url }}"
+                     alt="{{ request.user.username }}"
+                     class="avatar-preview"
+                     style="margin: 0 auto;">
+            {% else %}
+                <div class="avatar-placeholder" style="margin: 0 auto;">👤</div>
+            {% endif %}
+        </div>
+
+        <form method="POST"
+              action="{% url 'apps.social:edit_profile' %}"
+              enctype="multipart/form-data">
             {% csrf_token %}
+
             {% for field in form %}
                 <div class="form-group">
                     <label>{{ field.label }}</label>
                     {{ field }}
-                    {{ field.errors }}
+                    {% if field.help_text %}
+                        <small style="color:#555; font-size:11px; display:block; margin-top:4px;">
+                            {{ field.help_text }}
+                        </small>
+                    {% endif %}
+                    {% if field.errors %}
+                        <ul class="errorlist">
+                            {% for error in field.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
                 </div>
             {% endfor %}
+
             <button class="auth-btn" type="submit">Save Changes</button>
         </form>
 
-        <a href="{% url 'apps.social:profile' request.user.username %}" class="cancel-link">Cancel</a>
+        <a href="{% url 'apps.social:profile' request.user.username %}" class="cancel-link">
+            ← Back to Profile
+        </a>
     </div>
 </div>
 {% endblock %}

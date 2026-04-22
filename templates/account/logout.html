@@ -7,6 +7,7 @@
 <div class="auth-container">
     <div class="auth-card" style="text-align:center;">
         <div class="auth-header">
+            <div style="font-size:42px; margin-bottom:14px;">👋</div>
             <h1>Sign Out</h1>
             <p>{% trans 'Are you sure you want to sign out?' %}</p>
         </div>
@@ -16,7 +17,7 @@
             {% if redirect_field_value %}
                 <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}">
             {% endif %}
-            <button class="auth-btn" type="submit">{% trans 'Sign Out' %}</button>
+            <button class="auth-btn" type="submit">{% trans "Sign Out" %}</button>
         </form>
 
         <a href="/" class="cancel-link">Cancel and return home</a>

@@ -4,11 +4,12 @@
 
 {% block content %}
 <style>
+    /* ── Profile header banner ──────────────────────────────── */
     .profile-header-banner {
         background-color: #111;
-        border-bottom: 1px solid #333;
+        border-bottom: 1px solid #2e2e2e;
         padding: 36px 20px;
-        margin: -40px -20px 40px;   /* bleed out of .container */
+        margin: -40px -20px 40px; /* bleed out of .container */
     }
     .profile-header-container {
         max-width: 1200px;
@@ -20,125 +21,303 @@
         gap: 24px;
     }
 
-    .profile-identity { display: flex; align-items: center; gap: 20px; flex-wrap: wrap; }
+    /* ── Identity block (avatar + name) ─────────────────────── */
+    .profile-identity {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        flex-wrap: wrap;
+    }
     .profile-avatar {
-        width: 110px; height: 110px;
+        width: 110px;
+        height: 110px;
         background-color: #5799ef;
         border-radius: 50%;
-        display: flex; align-items: center; justify-content: center;
-        font-size: 54px; color: #fff;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 54px;
+        color: #fff;
+        box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
         flex-shrink: 0;
         object-fit: cover;
+        border: 2px solid #2e2e2e;
     }
-    .profile-name { font-size: 30px; color: #fff; font-weight: 400; margin: 0 0 4px 0; }
-    .profile-join-date { color: #aaa; font-size: 13px; display: flex; align-items: center; gap: 5px; }
+    .profile-name {
+        font-size: 30px;
+        color: #fff;
+        font-weight: 700;
+        margin: 0 0 4px 0;
+    }
+    .profile-join-date {
+        color: #666;
+        font-size: 13px;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        margin-top: 2px;
+    }
     .edit-profile-btn {
-        display: inline-block; margin-top: 10px;
-        background: transparent; color: #5799ef;
-        border: 1px solid #5799ef; padding: 5px 14px;
-        border-radius: 4px; font-size: 13px; font-weight: bold;
-        text-decoration: none; transition: all 0.2s;
+        display: inline-block;
+        margin-top: 10px;
+        background: transparent;
+        color: #5799ef;
+        border: 1px solid #5799ef;
+        padding: 5px 14px;
+        border-radius: 4px;
+        font-size: 13px;
+        font-weight: bold;
+        text-decoration: none;
+        transition: background 0.2s, color 0.2s;
     }
-    .edit-profile-btn:hover { background: rgba(87,153,239,0.1); color: #fff; }
+    .edit-profile-btn:hover {
+        background: rgba(87, 153, 239, 0.12);
+        color: #fff;
+        border-color: #fff;
+    }
 
-    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; min-width: 240px; }
+    /* ── Stats grid (tab navigation) ───────────────────────── */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        min-width: 240px;
+    }
     .stat-box {
         background-color: var(--imdb-light-gray);
-        border: 1px solid #333;
-        border-radius: 4px; padding: 14px;
-        text-align: center; transition: background-color 0.2s;
-        text-decoration: none; display: block;
+        border: 1px solid #2e2e2e;
+        border-radius: 8px;
+        padding: 14px;
+        text-align: center;
+        transition: background-color 0.2s, border-color 0.2s;
+        text-decoration: none;
+        display: block;
     }
-    .stat-box:hover { background-color: #333; border-color: #555; }
-    .stat-box.active { border-color: var(--imdb-yellow); background-color: #222; }
-    .stat-label { color: #aaa; font-size: 12px; font-weight: bold; margin-bottom: 4px; }
-    .stat-value { color: #fff; font-size: 20px; font-weight: bold; }
+    .stat-box:hover {
+        background-color: #2a2a2a;
+        border-color: #444;
+    }
+    .stat-box.active {
+        border-color: var(--imdb-yellow);
+        background-color: rgba(245, 197, 24, 0.05);
+    }
+    .stat-label {
+        color: #666;
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        margin-bottom: 6px;
+    }
+    .stat-value {
+        color: #fff;
+        font-size: 22px;
+        font-weight: 900;
+    }
 
+    /* ── Section title ──────────────────────────────────────── */
     .profile-section-title {
-        font-size: 22px; color: #fff;
+        font-size: 22px;
+        color: #fff;
         margin: 0 0 20px 0;
         border-left: 4px solid var(--imdb-yellow);
-        padding-left: 10px; font-weight: 400;
+        padding-left: 10px;
+        font-weight: 700;
     }
 
+    /* ── Review cards (overview = horizontal scroll) ─────────── */
     .reviews-container {
-        display: flex; gap: 18px;
-        overflow-x: auto; padding-bottom: 16px;
-        scrollbar-width: thin; scrollbar-color: #555 #111;
+        display: flex;
+        gap: 18px;
+        overflow-x: auto;
+        padding-bottom: 16px;
+        scrollbar-width: thin;
+        scrollbar-color: #333 transparent;
     }
-    .review-card {
-        min-width: 280px; max-width: 280px;
-        background: #1a1a1a; border: 1px solid #333;
-        border-radius: 6px; padding: 18px;
-        display: flex; flex-direction: column; gap: 8px;
-    }
-    .review-card.full-width { min-width: 100%; max-width: 100%; }
-    .review-card-header { display: flex; justify-content: space-between; align-items: center; }
-    .review-rating { color: #fff; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+    .reviews-container::-webkit-scrollbar { height: 4px; }
+    .reviews-container::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
 
+    .review-card {
+        min-width: 280px;
+        max-width: 280px;
+        background: #1a1a1a;
+        border: 1px solid #2e2e2e;
+        border-radius: 8px;
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        transition: border-color 0.2s;
+    }
+    .review-card:hover { border-color: #444; }
+    .review-card.full-width {
+        min-width: 100%;
+        max-width: 100%;
+    }
+    .review-card-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    .review-rating {
+        color: #fff;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 14px;
+    }
+    .review-date {
+        color: #555;
+        font-size: 12px;
+    }
+    .review-movie-title {
+        font-size: 15px;
+        font-weight: bold;
+        color: var(--imdb-yellow);
+        text-decoration: none;
+        line-height: 1.3;
+    }
+    .review-movie-title:hover { text-decoration: underline; }
+    .review-text {
+        color: #bbb;
+        font-size: 13px;
+        line-height: 1.6;
+        margin: 0;
+        font-style: italic;
+    }
+
+    /* ── List cards ─────────────────────────────────────────── */
     .list-card {
         background: var(--imdb-light-gray);
-        padding: 20px; border-radius: 8px;
-        border: 1px solid #333; margin-bottom: 20px;
+        padding: 20px;
+        border-radius: 8px;
+        border: 1px solid #2e2e2e;
+        margin-bottom: 16px;
+        transition: border-color 0.2s;
     }
+    .list-card:hover { border-color: #444; }
     .list-card-header {
-        display: flex; justify-content: space-between;
-        align-items: flex-start; margin-bottom: 14px; gap: 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 14px;
+        gap: 12px;
+    }
+    .list-card-title {
+        color: #fff;
+        text-decoration: none;
+        font-size: 17px;
+        font-weight: 700;
+        display: block;
+        margin: 0 0 4px 0;
+        transition: color 0.2s;
+    }
+    .list-card-title:hover { color: var(--imdb-yellow); }
+    .list-card-desc {
+        color: #666;
+        margin: 0;
+        font-size: 13px;
+    }
+    .list-item-count {
+        color: #aaa;
+        font-size: 12px;
+        background: #1a1a1a;
+        padding: 3px 10px;
+        border-radius: 12px;
+        border: 1px solid #333;
+        white-space: nowrap;
+        flex-shrink: 0;
     }
     .list-poster-strip {
-        display: flex; gap: 8px;
-        overflow-x: auto; padding-bottom: 4px;
-        scrollbar-width: thin; scrollbar-color: #555 #111;
+        display: flex;
+        gap: 8px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+        scrollbar-width: thin;
+        scrollbar-color: #333 transparent;
     }
+    .list-poster-strip::-webkit-scrollbar { height: 3px; }
+    .list-poster-strip::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+
     .list-thumb {
-        min-width: 60px; max-width: 60px;
-        text-decoration: none; display: block; transition: transform 0.2s; flex-shrink: 0;
+        min-width: 60px;
+        max-width: 60px;
+        text-decoration: none;
+        display: block;
+        transition: transform 0.2s;
+        flex-shrink: 0;
     }
-    .list-thumb:hover { transform: scale(1.05); }
-    .list-thumb img, .list-thumb .no-poster-sm {
-        width: 100%; aspect-ratio: 2/3;
-        object-fit: cover; border-radius: 4px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    .list-thumb:hover { transform: scale(1.07); }
+    .list-thumb img,
+    .list-thumb .no-poster-sm {
+        width: 100%;
+        aspect-ratio: 2/3;
+        object-fit: cover;
+        border-radius: 4px;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+        display: block;
     }
     .list-thumb .no-poster-sm {
-        background: #111; display: flex; align-items: center;
-        justify-content: center; font-size: 9px; color: #555;
-        text-align: center; border: 1px solid #222;
+        background: #111;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 9px;
+        color: #555;
+        text-align: center;
+        border: 1px solid #222;
     }
 
+    /* ── Empty states ───────────────────────────────────────── */
+    .profile-empty {
+        color: #555;
+        font-size: 14px;
+        padding: 30px 0;
+        font-style: italic;
+    }
+
+    /* ── Responsive ─────────────────────────────────────────── */
     @media (max-width: 768px) {
         .profile-header-banner { margin: -20px -14px 24px; padding: 24px 14px; }
         .profile-header-container { flex-direction: column; align-items: flex-start; }
-        .stats-grid { min-width: 100%; width: 100%; }
+        .stats-grid { min-width: 100%; width: 100%; grid-template-columns: repeat(4, 1fr); }
         .profile-name { font-size: 22px; }
         .profile-avatar { width: 80px; height: 80px; font-size: 38px; }
     }
-
     @media (max-width: 480px) {
         .profile-avatar { width: 64px; height: 64px; font-size: 28px; }
         .profile-section-title { font-size: 18px; }
+        .stats-grid { grid-template-columns: 1fr 1fr; }
     }
 </style>
 
+{# ── Header Banner ── #}
 <div class="profile-header-banner">
     <div class="profile-header-container">
         <div class="profile-identity">
             {% if profile_user.avatar %}
-                <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.username }}" class="profile-avatar">
+                <img src="{{ profile_user.avatar.url }}"
+                     alt="{{ profile_user.username }}"
+                     class="profile-avatar">
             {% else %}
                 <div class="profile-avatar">👤</div>
             {% endif %}
 
             <div>
                 <h1 class="profile-name">{{ profile_user.username }}</h1>
-                <div class="profile-join-date">📅 Joined {{ profile_user.date_joined|date:"M Y" }}</div>
+                <div class="profile-join-date">
+                    📅 Joined {{ profile_user.date_joined|date:"M Y" }}
+                </div>
                 {% if request.user == profile_user %}
-                    <a href="{% url 'apps.social:edit_profile' %}" class="edit-profile-btn">Edit Profile</a>
+                    <a href="{% url 'apps.social:edit_profile' %}" class="edit-profile-btn">
+                        ✏️ Edit Profile
+                    </a>
                 {% endif %}
             </div>
         </div>
 
+        {# Tab navigation #}
         <div class="stats-grid">
             <a href="?section=ratings" class="stat-box {% if section == 'ratings' %}active{% endif %}">
                 <div class="stat-label">Ratings</div>
@@ -160,7 +339,7 @@
     </div>
 </div>
 
-{# ---- Profile Body ---- #}
+{# ── Profile Body ── #}
 
 {% if section == 'overview' or section == 'reviews' %}
     <h2 class="profile-section-title">
@@ -168,25 +347,26 @@
     </h2>
 
     {% if display_reviews %}
-        <div class="{% if section == 'overview' %}reviews-container{% endif %}" style="{% if section == 'reviews' %}display:flex;flex-direction:column;gap:14px;{% endif %}">
+        <div class="{% if section == 'overview' %}reviews-container{% else %}reviews-list{% endif %}"
+             {% if section == 'reviews' %}style="display:flex; flex-direction:column; gap:14px;"{% endif %}>
             {% for review in display_reviews %}
                 <div class="review-card {% if section == 'reviews' %}full-width{% endif %}">
                     <div class="review-card-header">
                         <div class="review-rating">
                             <span style="color:var(--imdb-yellow);">★</span>
-                            {{ review.attached_rating|default:"-" }}/10
+                            {{ review.attached_rating|default:"–" }}/10
                         </div>
-                        <div style="color:#888;font-size:12px;">{{ review.created_at|date:"M d, Y" }}</div>
+                        <div class="review-date">{{ review.created_at|date:"M d, Y" }}</div>
                     </div>
-                    <a href="{% url 'apps.titles:movie_detail' review.title.id %}" style="font-size:15px;font-weight:bold;color:var(--imdb-yellow);text-decoration:none;">
+                    <a href="{% url 'apps.titles:movie_detail' review.title.id %}" class="review-movie-title">
                         {{ review.title.title }}
                     </a>
-                    <div style="color:#ccc;font-size:13px;line-height:1.5;">"{{ review.text }}"</div>
+                    <p class="review-text">"{{ review.text }}"</p>
                 </div>
             {% endfor %}
         </div>
     {% else %}
-        <p style="color:#666;">No reviews yet.</p>
+        <p class="profile-empty">No reviews yet.</p>
     {% endif %}
 
 {% elif section == 'ratings' %}
@@ -197,19 +377,23 @@
             {% for rating_obj in all_ratings %}
                 <a href="{% url 'apps.titles:movie_detail' rating_obj.title.id %}" class="movie-card">
                     {% if rating_obj.title.poster_url %}
-                        <img src="{{ rating_obj.title.poster_url }}" class="movie-card-poster" alt="{{ rating_obj.title.title }}">
+                        <img src="{{ rating_obj.title.poster_url }}"
+                             class="movie-card-poster"
+                             alt="{{ rating_obj.title.title }}">
                     {% else %}
                         <div class="no-poster">No Poster</div>
                     {% endif %}
                     <div class="movie-card-info" style="text-align:center;">
-                        <div style="color:var(--imdb-yellow);font-size:20px;font-weight:bold;margin-bottom:4px;">★ {{ rating_obj.value }}</div>
-                        <div style="color:#fff;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">{{ rating_obj.title.title }}</div>
+                        <div style="color:var(--imdb-yellow); font-size:20px; font-weight:900; margin-bottom:4px;">
+                            ★ {{ rating_obj.value }}
+                        </div>
+                        <div class="movie-card-title">{{ rating_obj.title.title }}</div>
                     </div>
                 </a>
             {% endfor %}
         </div>
     {% else %}
-        <p style="color:#666;">No ratings yet.</p>
+        <p class="profile-empty">No ratings yet.</p>
     {% endif %}
 
 {% elif section == 'lists' %}
@@ -220,14 +404,14 @@
             <div class="list-card">
                 <div class="list-card-header">
                     <div>
-                        <a href="{% url 'apps.lists:custom_list_detail' list_obj.id %}" style="color:#fff;text-decoration:none;">
-                            <h3 style="margin:0 0 4px 0;font-size:17px;">{{ list_obj.name }}</h3>
+                        <a href="{% url 'apps.lists:custom_list_detail' list_obj.id %}" class="list-card-title">
+                            {{ list_obj.name }}
                         </a>
-                        <p style="color:#aaa;margin:0;font-size:13px;">{{ list_obj.description|default:"No description provided." }}</p>
+                        <p class="list-card-desc">
+                            {{ list_obj.description|default:"No description provided." }}
+                        </p>
                     </div>
-                    <div style="color:#aaa;font-size:12px;background:#222;padding:3px 8px;border-radius:4px;border:1px solid #333;white-space:nowrap;flex-shrink:0;">
-                        {{ list_obj.items.count }} Items
-                    </div>
+                    <span class="list-item-count">{{ list_obj.items.count }} Items</span>
                 </div>
 
                 {% if list_obj.items.all %}
@@ -243,12 +427,14 @@
                         {% endfor %}
                     </div>
                 {% else %}
-                    <p style="color:#666;font-size:13px;font-style:italic;margin:0;">This list is empty.</p>
+                    <p style="color:#555; font-size:13px; font-style:italic; margin:0;">
+                        This list is empty.
+                    </p>
                 {% endif %}
             </div>
         {% endfor %}
     {% else %}
-        <p style="color:#666;">No custom lists yet.</p>
+        <p class="profile-empty">No custom lists yet.</p>
     {% endif %}
 
 {% endif %}
