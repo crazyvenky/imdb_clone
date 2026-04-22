@@ -1,14 +1,15 @@
+import requests
 from django.shortcuts import render
 from django.contrib.postgres.search import TrigramSimilarity
 from django.db.models import Q
 from apps.titles.models import Title
+from apps.titles.documents import TitleDocument
 from .utils import fetch_tmdb_titles, sync_tmdb_to_local
+from django.conf import settings
 
 def search_results_view(request):
-
     query = request.GET.get('q', '').strip()
     search_type = request.GET.get('s', 'all')
-    
     results = Title.objects.none()
 
     if query:
@@ -56,6 +57,65 @@ def search_results_view(request):
     context = {
         'query': query,
         'search_type': search_type,
+        'results': results,
+    }
+    return render(request, 'search/search_results.html', context)
+
+
+def search_es_view(request):
+    query = request.GET.get('q', '').strip()
+    results = []
+
+    if query:
+        search = TitleDocument.search().query(
+            "multi_match",
+            query=query,
+            fields=['title^3', 'description'],
+            fuzziness='AUTO'
+        )
+        
+        es_response = search.execute()
+
+        if len(es_response) > 0:
+            results = search.to_queryset()
+            print(f"DEBUG: Found '{query}' in Elasticsearch in {es_response.took}ms")
+            
+        else:
+            print(f"DEBUG: '{query}' not in ES. Reaching out to TMDB API...")
+
+            tmdb_url = "https://api.themoviedb.org/3/search/movie"
+            params = {
+                'api_key': settings.TMDB_API_KEY, 
+                'query': query,
+                'language': 'en-US',
+                'page': 1
+            }
+            
+            api_response = requests.get(tmdb_url, params=params)
+            
+            if api_response.status_code == 200:
+                tmdb_data = api_response.json().get('results', [])
+                
+                new_movies = []
+                
+                for item in tmdb_data[:5]: 
+                    movie, created = Title.objects.get_or_create(
+                        tmdb_id=item['id'],
+                        defaults={
+                            'title': item.get('title'),
+                            'description': item.get('overview', ''),
+                            'release_date': item.get('release_date') or None,
+                            'poster_path': item.get('poster_path', ''),
+                            'backdrop_path': item.get('backdrop_path', ''),
+                            'popularity': item.get('popularity', 0.0),
+                        }
+                    )
+                    new_movies.append(movie)
+                results = new_movies
+                print(f"DEBUG: Successfully ingested {len(new_movies)} new movies into the database.")
+
+    context = {
+        'query': query,
         'results': results,
     }
     return render(request, 'search/search_results.html', context)

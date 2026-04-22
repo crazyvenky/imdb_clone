@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'django.contrib.sites',
     'django.contrib.postgres',
     
+    'django_elasticsearch_dsl',
     # 3rd Party
     'allauth',
     'allauth.account',
@@ -148,3 +149,11 @@ ACCOUNT_RATE_LIMITS = {
 }
 
 TMDB_READ_ACCESS_TOKEN = env('TMDB_READ_ACCESS_TOKEN', default='')
+
+
+# ELASTICSEARCH CONFIGURATION
+ELASTICSEARCH_DSL = {
+    'default': {
+        'hosts': 'http://localhost:9200',
+    },
+}

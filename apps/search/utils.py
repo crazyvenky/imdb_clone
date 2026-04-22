@@ -52,7 +52,6 @@ def sync_tmdb_to_local(tmdb_results):
 # 2. DETAILS API (Used by Detail View)
 # ==========================================
 def fetch_tmdb_details(tmdb_id):
-    # NEW: We added ",videos" to the append_to_response!
     url = f"https://api.themoviedb.org/3/movie/{tmdb_id}?append_to_response=credits,videos"
     headers = {
         "accept": "application/json",

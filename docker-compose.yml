@@ -1,0 +1,17 @@
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.0
+    container_name: cineverse_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false  # Disables passwords for easy local development
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m  # Caps RAM usage so your laptop doesn't freeze
+    ports:
+      - "9200:9200"
+
+  redis:
+    image: redis:7-alpine
+    container_name: cineverse_redis
+    ports:
+      - "6379:6379"
